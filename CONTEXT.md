@@ -12,7 +12,9 @@ quality, security, and maintainability matter as much as features.
 ## 2. Tech Stack
 - **Framework:** Next.js (App Router)
 - **Language:** TypeScript (strict mode) — no plain `.js` files in `src/`
-- **Styling:** Tailwind CSS
+- **Styling:** Tailwind CSS v4 — CSS-first theming via `@theme` in
+  `src/app/globals.css`; there is no `tailwind.config.ts` and future specs
+  must not create one
 - **Database/Backend:** Supabase (Postgres, Auth, Storage)
 - **Payments:** Cash on Delivery + JazzCash
 - **Package manager:** npm (never yarn/pnpm — keep lockfile consistent)
