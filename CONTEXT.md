@@ -98,5 +98,5 @@ when prices are updated later.
 ## 9. Agent Working Mode
 - Mode: `plan` (review proposed changes before they're applied) during
   early phases; may switch to `build` + git-diff review in later phases
-- Reasoning effort: `medium`
+- Reasoning effort: `low`
 - One task per spec — do not combine unrelated changes in a single session
