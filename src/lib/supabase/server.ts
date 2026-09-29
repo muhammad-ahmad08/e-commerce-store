@@ -1,7 +1,7 @@
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 
-export async function createClient() {
+function getSupabaseCredentials() {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
   const supabasePublishableKey =
     process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
@@ -9,6 +9,27 @@ export async function createClient() {
   if (!supabaseUrl || !supabasePublishableKey) {
     throw new Error('Supabase URL and publishable key must be configured.')
   }
+
+  return { supabaseUrl, supabasePublishableKey }
+}
+
+export function createPublicClient() {
+  const { supabaseUrl, supabasePublishableKey } = getSupabaseCredentials()
+
+  return createServerClient(supabaseUrl, supabasePublishableKey, {
+    cookies: {
+      getAll() {
+        return []
+      },
+      setAll() {
+        // Public, cacheable reads do not access or mutate user sessions.
+      },
+    },
+  })
+}
+
+export async function createClient() {
+  const { supabaseUrl, supabasePublishableKey } = getSupabaseCredentials()
 
   const cookieStore = await cookies()
 
