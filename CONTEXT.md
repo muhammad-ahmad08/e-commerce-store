@@ -80,8 +80,12 @@ when prices are updated later.
 ## 7. Non-Negotiable Business Rules
 1. **Never trust the client.** All prices, stock levels, and totals are
    recalculated server-side — never accepted as-is from client requests.
-2. **Secrets never reach the browser.** Supabase `service_role` key is
-   server-only. Only the `anon` key may appear in client-side code.
+2. **Secrets never reach the browser.** The Supabase publishable key is
+   designed for browser use with low privilege and RLS enforcement. The
+   secret key is server-only and has elevated privileges that can bypass RLS.
+   These names replace the legacy `anon` and `service_role` terminology;
+   their underlying privilege levels are unchanged. Never expose the secret
+   key in client-side code or `NEXT_PUBLIC_` environment variables.
 3. **Row Level Security (RLS) must be enabled** on every Supabase table
    holding customer or order data — application code is not the only
    line of defense.
@@ -102,3 +106,13 @@ when prices are updated later.
   early phases; may switch to `build` + git-diff review in later phases
 - Reasoning effort: `low`
 - One task per spec — do not combine unrelated changes in a single session
+
+## 10. Supabase Client Locations
+- `src/lib/supabase/client.ts` — browser client for Client Components, using
+  `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`.
+- `src/lib/supabase/server.ts` — cookie-aware server client for Server
+  Components, Server Actions, and Route Handlers, using the publishable key.
+- `proxy.ts` — refreshes Supabase Auth cookies on incoming requests. Next.js
+  16 uses the `proxy.ts` convention (renamed from `middleware.ts`).
+- `SUPABASE_SECRET_KEY` is reserved for later server-only administrative
+  operations; it is not used by these standard SSR clients.
