@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import CategoryCard from "@/components/shop/CategoryCard";
 import ProductCard from "@/components/shop/ProductCard";
 import { getCategories, getFeaturedProducts } from "@/lib/supabase/queries";
@@ -34,18 +35,15 @@ export default async function HomePage() {
             </Link>
           </div>
 
-          <div
-            aria-hidden="true"
-            className="relative mx-auto flex aspect-[4/3] w-full max-w-xl items-center justify-center bg-background-primary"
-          >
-            <div className="absolute inset-[8%] border border-brand-forest/20" />
-            <div className="absolute inset-[16%] bg-brand-forest" />
-            <div className="absolute inset-y-[16%] left-[16%] w-[34%] bg-brand-terracotta/90" />
-            <div className="absolute inset-y-[16%] right-[16%] w-[34%] bg-background-secondary" />
-            <div className="absolute inset-y-[16%] left-1/2 w-px -translate-x-1/2 bg-background-primary/70" />
-            <div className="absolute bottom-[23%] left-1/2 -translate-x-1/2 border border-background-primary/60 px-4 py-2 text-center font-serif text-sm tracking-wide text-background-primary sm:text-base">
-              AURELIA · EST. MMXX
-            </div>
+          <div className="relative mx-auto aspect-[4/3] w-full max-w-xl overflow-hidden bg-background-primary">
+            <Image
+              src="/images/hero/hero-banner.jpg"
+              alt="A model wearing a considered everyday outfit in a warm, sunlit interior"
+              fill
+              priority
+              sizes="(max-width: 768px) 100vw, 50vw"
+              className="object-cover"
+            />
           </div>
         </div>
       </section>
@@ -123,8 +121,16 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <section className="bg-brand-forest text-background-primary">
-        <div className="mx-auto grid max-w-7xl gap-8 px-5 py-16 sm:py-20 md:grid-cols-[1fr_1.2fr] md:items-center md:gap-16 md:px-16 md:py-24">
+      <section className="relative isolate overflow-hidden bg-brand-forest text-background-primary">
+        <Image
+          src="/images/story/story-section.jpg"
+          alt="A craftsperson weaving fabric on a traditional loom"
+          fill
+          sizes="100vw"
+          className="z-0 object-cover"
+        />
+        <div aria-hidden="true" className="absolute inset-0 z-10 bg-brand-forest/75" />
+        <div className="relative z-20 mx-auto grid max-w-7xl gap-8 px-5 py-16 sm:py-20 md:grid-cols-[1fr_1.2fr] md:items-center md:gap-16 md:px-16 md:py-24">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-background-secondary">
               Our point of view

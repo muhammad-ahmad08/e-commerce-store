@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import type { FeaturedProduct } from "@/lib/supabase/queries";
 
 type ProductCardProps = {
@@ -18,16 +19,18 @@ export default function ProductCard({
     <article>
       <Link href={`/products/${product.slug}`} className="group block">
         <div className="relative aspect-square overflow-hidden bg-background-secondary">
-          <div className="absolute inset-0 flex items-center justify-center bg-background-secondary px-6 text-center transition-transform duration-250 ease-editorial group-hover:scale-[1.03]">
-            {showCatalogActions && product.categoryName ? (
-              <span className="absolute left-4 top-4 rounded-full bg-background-primary px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-foreground-muted">
-                {product.categoryName}
-              </span>
-            ) : null}
-            <span className="bg-background-primary/80 px-4 py-2 font-serif text-xl text-foreground-primary sm:text-2xl">
-              {product.name}
+          <Image
+            src={`/images/products/${product.slug}.jpg`}
+            alt={product.name}
+            fill
+            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+            className="object-cover transition-transform duration-250 ease-editorial group-hover:scale-[1.03]"
+          />
+          {showCatalogActions && product.categoryName ? (
+            <span className="absolute left-4 top-4 rounded-full bg-background-primary px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-foreground-muted">
+              {product.categoryName}
             </span>
-          </div>
+          ) : null}
         </div>
         <div className="mt-4 flex flex-col gap-1">
           <h3 className="font-sans text-sm font-medium text-foreground-primary sm:text-base">

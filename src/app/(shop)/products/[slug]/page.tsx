@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { notFound } from "next/navigation";
 import ProductScrollRow from "@/components/shop/ProductScrollRow";
 import VariantSelector from "@/components/shop/VariantSelector";
@@ -57,10 +58,14 @@ export default async function ProductPage({ params }: ProductPageProps) {
       </nav>
 
       <section className="grid gap-8 md:grid-cols-2 md:gap-16">
-        <div className="flex aspect-[4/5] items-center justify-center bg-background-secondary p-8 text-center">
-          <span className="bg-background-primary/80 px-6 py-4 font-serif text-3xl text-foreground-primary sm:text-4xl">
-            {product.name}
-          </span>
+        <div className="relative aspect-[4/5] overflow-hidden bg-background-secondary">
+          <Image
+            src={`/images/products/${product.slug}.jpg`}
+            alt={product.name}
+            fill
+            sizes="(max-width: 768px) 100vw, 50vw"
+            className="object-cover"
+          />
         </div>
 
         <div className="py-2 md:py-8">
