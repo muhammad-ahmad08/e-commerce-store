@@ -28,24 +28,6 @@ export type FeaturedProduct = {
   categoryName?: string;
 };
 
-export type ProductVariant = {
-  id: string;
-  size: string;
-  color: string;
-  stock: number;
-  price: number;
-};
-
-export type ProductDetail = {
-  id: string;
-  name: string;
-  slug: string;
-  description: string | null;
-  basePrice: number;
-  category: Category;
-  variants: ProductVariant[];
-};
-
 export type ProductSort = "default" | "new";
 
 export type ProductsResult = {
@@ -190,82 +172,6 @@ export async function getFeaturedProducts(): Promise<FeaturedProduct[]> {
       "Failed to create the Supabase client for featured products:",
       error,
     );
-    return [];
-  }
-}
-
-export async function getProductBySlug(slug: string): Promise<ProductDetail | null> {
-  try {
-    const supabase = createPublicClient();
-    const { data, error } = await supabase
-      .from("products")
-      .select("id, name, slug, description, base_price, product_variants(id, size, color, stock, price), category:categories(id, name, slug)")
-      .eq("slug", slug)
-      .eq("is_active", true)
-      .maybeSingle();
-
-    if (error || !data) {
-      if (error) console.error("Failed to fetch product detail:", error.message);
-      return null;
-    }
-
-    const product = data as unknown as {
-      id: string;
-      name: string;
-      slug: string;
-      description: string | null;
-      base_price: number | string;
-      product_variants: Array<{ id: string; size: string; color: string; stock: number; price: number | string }>;
-      category: Category | Category[];
-    };
-    const category = Array.isArray(product.category) ? product.category[0] : product.category;
-    if (!category) return null;
-
-    return {
-      id: product.id,
-      name: product.name,
-      slug: product.slug,
-      description: product.description,
-      basePrice: Number(product.base_price),
-      category,
-      variants: product.product_variants.map((variant) => ({
-        id: variant.id,
-        size: variant.size,
-        color: variant.color,
-        stock: variant.stock,
-        price: Number(variant.price),
-      })),
-    };
-  } catch (error) {
-    console.error("Failed to create the Supabase client for product detail:", error);
-    return null;
-  }
-}
-
-export async function getRelatedProducts(
-  categoryId: string,
-  excludeProductId: string,
-  limit: number,
-): Promise<FeaturedProduct[]> {
-  try {
-    const supabase = createPublicClient();
-    const { data, error } = await supabase
-      .from("products")
-      .select("id, name, slug, base_price, product_variants(price)")
-      .eq("is_active", true)
-      .eq("category_id", categoryId)
-      .neq("id", excludeProductId)
-      .order("created_at", { ascending: false })
-      .limit(Math.max(0, limit));
-
-    if (error) {
-      console.error("Failed to fetch related products:", error.message);
-      return [];
-    }
-
-    return ((data ?? []) as ProductRow[]).map((product) => mapProduct(product));
-  } catch (error) {
-    console.error("Failed to create the Supabase client for related products:", error);
     return [];
   }
 }
