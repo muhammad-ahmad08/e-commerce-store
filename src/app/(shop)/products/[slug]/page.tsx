@@ -83,6 +83,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
           <VariantSelector
             variants={product.variants}
             basePrice={product.basePrice}
+            product={{ id: product.id, slug: product.slug, name: product.name }}
           />
         </div>
       </section>

@@ -42,12 +42,12 @@ export default function ProductCard({
         </div>
       </Link>
       {showCatalogActions ? (
-        <button
-          type="button"
-          className="mt-4 min-h-11 w-full border border-brand-forest px-4 text-xs font-semibold uppercase tracking-[0.15em] text-brand-forest transition-colors duration-250 ease-editorial hover:bg-brand-forest hover:text-background-primary"
+        <Link
+          href={`/products/${product.slug}`}
+          className="mt-4 flex min-h-11 w-full items-center justify-center border border-brand-forest px-4 text-xs font-semibold uppercase tracking-[0.15em] text-brand-forest transition-colors duration-250 ease-editorial hover:bg-brand-forest hover:text-background-primary"
         >
           Add to Cart
-        </button>
+        </Link>
       ) : null}
     </article>
   );

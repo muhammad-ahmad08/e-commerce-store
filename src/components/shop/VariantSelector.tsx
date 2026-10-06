@@ -2,17 +2,19 @@
 
 import { useMemo, useState } from "react";
 import type { ProductVariant } from "@/lib/supabase/queries";
+import { useCart } from "@/lib/cart/CartContext";
 
 type VariantSelectorProps = {
   variants: ProductVariant[];
   basePrice: number;
+  product: { id: string; slug: string; name: string };
 };
 
 const priceFormatter = new Intl.NumberFormat("en-PK", {
   maximumFractionDigits: 2,
 });
 
-export default function VariantSelector({ variants, basePrice }: VariantSelectorProps) {
+export default function VariantSelector({ variants, basePrice, product }: VariantSelectorProps) {
   const colors = useMemo(
     () => [...new Set(variants.map((variant) => variant.color))],
     [variants],
@@ -26,6 +28,8 @@ export default function VariantSelector({ variants, basePrice }: VariantSelector
     variants.find((variant) => variant.color === colors[0])?.size ?? "",
   );
   const [quantity, setQuantity] = useState(1);
+  const { addItem } = useCart();
+  const [addedMessage, setAddedMessage] = useState("");
   const activeVariant = variants.find(
     (variant) => variant.color === selectedColor && variant.size === selectedSize,
   );
@@ -35,11 +39,13 @@ export default function VariantSelector({ variants, basePrice }: VariantSelector
     setSelectedColor(color);
     setSelectedSize(variants.find((variant) => variant.color === color)?.size ?? "");
     setQuantity(1);
+    setAddedMessage("");
   }
 
   function handleSizeChange(size: string) {
     setSelectedSize(size);
     setQuantity(1);
+    setAddedMessage("");
   }
 
   if (variants.length === 0) {
@@ -162,11 +168,29 @@ export default function VariantSelector({ variants, basePrice }: VariantSelector
         <button
           type="button"
           disabled={stock === 0}
-          className="min-h-12 flex-1 bg-brand-terracotta px-6 text-xs font-semibold uppercase tracking-[0.15em] text-white transition-opacity duration-250 ease-editorial disabled:cursor-not-allowed disabled:opacity-50"
+          onClick={() => {
+            if (!activeVariant) return;
+            addItem({
+              variantId: activeVariant.id,
+              productId: product.id,
+              productSlug: product.slug,
+              productName: product.name,
+              size: activeVariant.size,
+              color: activeVariant.color,
+              unitPrice: activeVariant.price,
+              quantity,
+              stockAtTimeAdded: activeVariant.stock,
+            });
+            setAddedMessage(`${product.name} added to your cart`);
+          }}
+          className="min-h-12 flex-1 bg-brand-terracotta px-6 text-xs font-semibold uppercase tracking-[0.15em] text-white transition-opacity duration-250 ease-editorial hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
         >
           Add to Cart
         </button>
       </div>
+      <p aria-live="polite" className="min-h-5 text-sm text-brand-forest">
+        {addedMessage}
+      </p>
     </div>
   );
 }

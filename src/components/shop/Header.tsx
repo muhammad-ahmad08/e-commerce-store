@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { useCart } from "@/lib/cart/CartContext";
 
 const navLinks = [
   { href: "/", label: "Home" },
@@ -13,6 +14,7 @@ const interactiveClasses =
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { totalItems } = useCart();
 
   return (
     <header className="relative z-10 border-b border-border-token bg-background-primary text-foreground-primary">
@@ -41,7 +43,7 @@ export default function Header() {
           <Link
             href="/cart"
             className={`relative inline-flex items-center justify-center ${interactiveClasses}`}
-            aria-label="Cart, 0 items"
+            aria-label={`Cart, ${totalItems} ${totalItems === 1 ? "item" : "items"}`}
           >
             <svg
               aria-hidden="true"
@@ -56,7 +58,7 @@ export default function Header() {
               <circle cx="17" cy="20" r="1" />
             </svg>
             <span className="absolute -right-2 -top-2 flex size-4 items-center justify-center rounded-full bg-brand-terracotta text-[10px] font-semibold text-background-primary">
-              0
+              {totalItems}
             </span>
           </Link>
 
