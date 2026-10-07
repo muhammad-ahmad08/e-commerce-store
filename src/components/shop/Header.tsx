@@ -1,8 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import { useCart } from "@/lib/cart/CartContext";
+import { createClient } from "@/lib/supabase/client";
 
 const navLinks = [
   { href: "/", label: "Home" },
@@ -14,7 +16,33 @@ const interactiveClasses =
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const router = useRouter();
   const { totalItems } = useCart();
+
+  useEffect(() => {
+    const supabase = createClient();
+    supabase.auth.getSession().then(({ data }) => {
+      setIsAuthenticated(Boolean(data.session));
+    });
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setIsAuthenticated(Boolean(session));
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  async function handleLogout() {
+    setIsLoggingOut(true);
+    const supabase = createClient();
+    const { error } = await supabase.auth.signOut();
+    setIsLoggingOut(false);
+    if (!error) {
+      router.replace("/");
+      router.refresh();
+    }
+  }
 
   return (
     <header className="relative z-10 border-b border-border-token bg-background-primary text-foreground-primary">
@@ -40,6 +68,23 @@ export default function Header() {
         </nav>
 
         <div className="flex items-center gap-5">
+          {isAuthenticated ? (
+            <button
+              type="button"
+              onClick={handleLogout}
+              disabled={isLoggingOut}
+              className={`text-xs font-semibold uppercase tracking-[0.12em] disabled:opacity-60 ${interactiveClasses}`}
+            >
+              {isLoggingOut ? "Logging out…" : "Log out"}
+            </button>
+          ) : (
+            <Link
+              href="/login"
+              className={`text-xs font-semibold uppercase tracking-[0.12em] ${interactiveClasses}`}
+            >
+              Log in
+            </Link>
+          )}
           <Link
             href="/cart"
             className={`relative inline-flex items-center justify-center ${interactiveClasses}`}
