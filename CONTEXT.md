@@ -94,20 +94,32 @@ when prices are updated later.
 5. **Full product variants**: stock and price are tracked per size+color
    combination, never at the product level alone.
 
-## 8. Git Workflow
+## 8. Order Placement
+- All customer orders are created exclusively through the `place_order()`
+  database function. It atomically validates and locks variant stock, creates
+  the order and its items, then decrements stock; a failure rolls back the
+  complete transaction.
+- Prices and stock are never accepted from the client. The function reads
+  current prices and stock from the database and stores purchase-time prices
+  on order items.
+- Customers have no direct INSERT privilege on `orders` or `order_items`.
+  Future specs and order flows must reuse `place_order()` rather than inserting
+  order records directly.
+
+## 9. Git Workflow
 - `main` = always deployable
 - Feature branches: `feature/<short-description>`
 - Commit before every agent session (rollback point) and immediately after
   reviewing/accepting changes
 - Commit messages: `feat:`, `fix:`, `chore:` prefixes, describe *what* changed
 
-## 9. Agent Working Mode
+## 10. Agent Working Mode
 - Mode: `plan` (review proposed changes before they're applied) during
   early phases; may switch to `build` + git-diff review in later phases
 - Reasoning effort: `low`
 - One task per spec — do not combine unrelated changes in a single session
 
-## 10. Supabase Client Locations
+## 11. Supabase Client Locations
 - `src/lib/supabase/client.ts` — browser client for Client Components, using
   `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`.
 - `src/lib/supabase/server.ts` — cookie-aware server client for Server

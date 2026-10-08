@@ -71,33 +71,19 @@ create policy "Users can update own profile"
   using (auth.uid() = id);
 
 -- -------------------------------------------------------------
--- ORDERS: users can view/create ONLY their own orders
+-- ORDERS: users can view ONLY their own orders
 -- -------------------------------------------------------------
 create policy "Users can view own orders"
   on orders for select
   using (auth.uid() = customer_id);
 
-create policy "Users can create own orders"
-  on orders for insert
-  with check (auth.uid() = customer_id);
-
 -- -------------------------------------------------------------
--- ORDER ITEMS: users can view/create items belonging to
--- THEIR OWN orders (checked via a subquery into orders)
+-- ORDER ITEMS: users can view items belonging to THEIR OWN orders
+-- (checked via a subquery into orders); inserts use place_order().
 -- -------------------------------------------------------------
 create policy "Users can view own order items"
   on order_items for select
   using (
-    exists (
-      select 1 from orders
-      where orders.id = order_items.order_id
-      and orders.customer_id = auth.uid()
-    )
-  );
-
-create policy "Users can create own order items"
-  on order_items for insert
-  with check (
     exists (
       select 1 from orders
       where orders.id = order_items.order_id
