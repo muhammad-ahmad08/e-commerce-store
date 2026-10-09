@@ -128,3 +128,12 @@ when prices are updated later.
   16 uses the `proxy.ts` convention (renamed from `middleware.ts`).
 - `SUPABASE_SECRET_KEY` is reserved for later server-only administrative
   operations; it is not used by these standard SSR clients.
+
+## 12. Store Configuration
+- `src/config/store.ts` exports public store contact and payment details from
+  environment variables. The WhatsApp number is normalized to digits only for
+  `wa.me` links.
+- Configure `NEXT_PUBLIC_STORE_WHATSAPP_NUMBER`,
+  `NEXT_PUBLIC_JAZZCASH_ACCOUNT_NUMBER`, and
+  `NEXT_PUBLIC_JAZZCASH_ACCOUNT_NAME` in `.env.local` for the JazzCash payment
+  instructions and WhatsApp click-to-chat link.

@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
+import { storeConfig } from "@/config/store";
 import { getOrderById } from "@/lib/supabase/orders";
 import { createClient } from "@/lib/supabase/server";
 
@@ -29,6 +30,15 @@ export default async function OrderConfirmationPage({ params }: OrderConfirmatio
   if (!order) notFound();
 
   const isJazzCash = order.paymentMethod === "jazzcash";
+  const orderReference = order.id.slice(0, 8).toUpperCase();
+  const formattedTotal = priceFormatter.format(order.totalAmount);
+  const hasJazzCashDetails = Boolean(
+    storeConfig.whatsappNumber &&
+      storeConfig.jazzCashAccountNumber &&
+      storeConfig.jazzCashAccountName,
+  );
+  const whatsappMessage = `Hi, I placed order ${orderReference} and sent Rs. ${formattedTotal} via JazzCash. Screenshot attached.`;
+  const whatsappUrl = `https://wa.me/${storeConfig.whatsappNumber}?text=${encodeURIComponent(whatsappMessage)}`;
 
   return (
     <main className="mx-auto w-full max-w-4xl flex-1 px-5 py-12 md:px-16 md:py-16">
@@ -39,7 +49,7 @@ export default async function OrderConfirmationPage({ params }: OrderConfirmatio
         Thank you for your order
       </h1>
       <p className="mt-4 text-sm leading-6 text-foreground-muted">
-        Order reference <span className="font-semibold text-foreground-primary">{order.id.slice(0, 8).toUpperCase()}</span>
+        Order reference <span className="font-semibold text-foreground-primary">{orderReference}</span>
       </p>
 
       <section className="mt-10 grid gap-8 border-y border-border-token py-8 sm:grid-cols-2" aria-label="Order details">
@@ -93,11 +103,54 @@ export default async function OrderConfirmationPage({ params }: OrderConfirmatio
         </div>
       </section>
 
-      <p className="mt-8 bg-background-secondary p-5 text-sm leading-6 text-foreground-primary">
-        {isJazzCash
-          ? "Your order is pending. JazzCash payment instructions will be shared with you shortly."
-          : "Your order is pending. Please pay the courier when your order is delivered."}
-      </p>
+      {isJazzCash ? (
+        <section className="mt-8 border border-border-token bg-background-secondary p-5 sm:p-7" aria-labelledby="jazzcash-instructions-heading">
+          <h2 id="jazzcash-instructions-heading" className="font-serif text-2xl text-foreground-primary">
+            JazzCash payment
+          </h2>
+          {hasJazzCashDetails ? (
+            <>
+              <dl className="mt-5 grid gap-4 text-sm sm:grid-cols-2">
+                <div>
+                  <dt className="text-foreground-muted">Account name</dt>
+                  <dd className="mt-1 font-semibold text-foreground-primary">{storeConfig.jazzCashAccountName}</dd>
+                </div>
+                <div>
+                  <dt className="text-foreground-muted">Account number</dt>
+                  <dd className="mt-1 font-semibold text-foreground-primary">{storeConfig.jazzCashAccountNumber}</dd>
+                </div>
+                <div>
+                  <dt className="text-foreground-muted">Exact amount to send</dt>
+                  <dd className="mt-1 font-semibold text-foreground-primary">Rs. {formattedTotal}</dd>
+                </div>
+                <div>
+                  <dt className="text-foreground-muted">Order reference</dt>
+                  <dd className="mt-1 font-semibold text-foreground-primary">{orderReference}</dd>
+                </div>
+              </dl>
+              <p className="mt-5 text-sm leading-6 text-foreground-muted">
+                Please quote your order reference when sending the payment.
+              </p>
+              <a
+                href={whatsappUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-6 inline-flex min-h-12 items-center justify-center bg-brand-terracotta px-7 text-xs font-semibold uppercase tracking-[0.15em] text-background-primary transition-colors duration-250 hover:bg-brand-forest"
+              >
+                Send payment screenshot on WhatsApp
+              </a>
+            </>
+          ) : (
+            <p className="mt-3 text-sm leading-6 text-foreground-primary">
+              The store will contact you with payment details
+            </p>
+          )}
+        </section>
+      ) : (
+        <p className="mt-8 bg-background-secondary p-5 text-sm leading-6 text-foreground-primary">
+          Your order is pending. Please pay the courier when your order is delivered.
+        </p>
+      )}
       <Link
         href="/shop"
         className="mt-8 inline-flex min-h-12 items-center justify-center bg-brand-forest px-7 text-xs font-semibold uppercase tracking-[0.15em] text-background-primary"
