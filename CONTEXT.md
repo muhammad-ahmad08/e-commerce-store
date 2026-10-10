@@ -137,3 +137,16 @@ when prices are updated later.
   `NEXT_PUBLIC_JAZZCASH_ACCOUNT_NUMBER`, and
   `NEXT_PUBLIC_JAZZCASH_ACCOUNT_NAME` in `.env.local` for the JazzCash payment
   instructions and WhatsApp click-to-chat link.
+
+## 13. Admin Access
+- Admins are identified exclusively by rows in the `admins` table. Never store
+  admin status as a role column on `profiles`: customers can edit their own
+  profile, so a profile role could let a customer promote themselves.
+- Application admin access is checked with the `is_admin()` database function
+  through the authenticated, session-based Supabase server client.
+- Every admin page and every admin Server Action must call
+  `requireAdmin()` itself. An admin layout also checks access, but layouts may
+  not re-run during App Router navigation.
+- Database RLS policies and privileges are the backstop for admin data access;
+  application checks are not a replacement for database authorization.
+- Admin dashboard dates use the `STORE_TIME_ZONE` constant (`Asia/Karachi`).
