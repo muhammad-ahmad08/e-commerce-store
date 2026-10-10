@@ -150,3 +150,15 @@ when prices are updated later.
 - Database RLS policies and privileges are the backstop for admin data access;
   application checks are not a replacement for database authorization.
 - Admin dashboard dates use the `STORE_TIME_ZONE` constant (`Asia/Karachi`).
+
+## 14. Admin Order Management
+- Order status changes happen only through the `admin_update_order_status()`
+  database function. It enforces the valid transitions
+  (`pending` → `confirmed` → `shipped` → `delivered`, with cancellation
+  allowed from `pending` and `confirmed`) and restores item stock atomically
+  when an order is cancelled.
+- The payment-received marker is changed only through
+  `admin_set_payment_received()`; a cancelled order cannot be marked as paid.
+- Admins and customers have no direct `UPDATE` privilege on `orders`. Admin
+  order actions must use the session-based client and the database functions;
+  application code must not write to `orders` or `product_variants` directly.

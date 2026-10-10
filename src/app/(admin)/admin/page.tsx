@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { STORE_TIME_ZONE } from "@/config/store";
 import { requireAdmin } from "@/lib/auth/requireAdmin";
 import { getAdminDashboardData } from "@/lib/supabase/admin-queries";
@@ -41,12 +42,19 @@ export default async function AdminDashboardPage() {
 
       <section aria-label="Order summary" className="mt-8 grid gap-4 sm:grid-cols-3">
         {summaryLabels.map(({ key, label }) => (
-          <article key={key} className="border border-border-token bg-background-secondary p-5 sm:p-6">
-            <p className="text-sm text-foreground-muted">{label}</p>
-            <p className="mt-3 font-serif text-4xl text-foreground-primary">
-              {dashboard[key]}
-            </p>
-          </article>
+          key === "pendingOrders" ? (
+            <Link key={key} href="/admin/orders?status=pending" className="border border-border-token bg-background-secondary p-5 sm:p-6">
+              <p className="text-sm text-foreground-muted">{label}</p>
+              <p className="mt-3 font-serif text-4xl text-foreground-primary hover:text-brand-terracotta">
+                {dashboard[key]}
+              </p>
+            </Link>
+          ) : (
+            <article key={key} className="border border-border-token bg-background-secondary p-5 sm:p-6">
+              <p className="text-sm text-foreground-muted">{label}</p>
+              <p className="mt-3 font-serif text-4xl text-foreground-primary">{dashboard[key]}</p>
+            </article>
+          )
         ))}
       </section>
 
@@ -78,7 +86,11 @@ export default async function AdminDashboardPage() {
               <tbody className="divide-y divide-border-token">
                 {dashboard.recentOrders.map((order) => (
                   <tr key={order.id}>
-                    <td className="px-4 py-4 font-semibold">{order.id.slice(0, 8).toUpperCase()}</td>
+                    <td className="px-4 py-4 font-semibold">
+                      <Link href={`/admin/orders/${order.id}`} className="underline decoration-border-token underline-offset-4 hover:text-brand-terracotta">
+                        {order.id.slice(0, 8).toUpperCase()}
+                      </Link>
+                    </td>
                     <td className="px-4 py-4">{order.shippingName}</td>
                     <td className="whitespace-nowrap px-4 py-4 text-foreground-muted">
                       {dateFormatter.format(new Date(order.createdAt))}

@@ -6,6 +6,8 @@ type PaginationProps = {
   totalCount: number;
   href: string;
   sort?: "default" | "new";
+  pageSize?: number;
+  status?: string;
 };
 
 export default function Pagination({
@@ -13,14 +15,17 @@ export default function Pagination({
   totalCount,
   href,
   sort = "default",
+  pageSize = PRODUCT_PAGE_SIZE,
+  status,
 }: PaginationProps) {
-  const totalPages = Math.ceil(totalCount / PRODUCT_PAGE_SIZE);
+  const totalPages = Math.ceil(totalCount / pageSize);
   if (totalPages <= 1) return null;
 
   const pageHref = (page: number) => {
     const params = new URLSearchParams();
     if (page > 1) params.set("page", String(page));
     if (sort === "new") params.set("sort", "new");
+    if (status) params.set("status", status);
     const query = params.toString();
     return `${href}${query ? `?${query}` : ""}`;
   };
