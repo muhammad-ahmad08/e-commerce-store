@@ -162,3 +162,20 @@ when prices are updated later.
 - Admins and customers have no direct `UPDATE` privilege on `orders`. Admin
   order actions must use the session-based client and the database functions;
   application code must not write to `orders` or `product_variants` directly.
+
+## 15. Admin Product & Variant Management
+- Product and variant writes use direct table operations through the
+  session-based Supabase client. Admin-only RLS policies and column-level
+  grants are the database enforcement layer; never use `SUPABASE_SECRET_KEY`
+  for these writes.
+- A product slug is immutable after creation because it identifies the public
+  product URL and the current product-photo filename.
+- `base_price` is only a default and fallback, never the displayed price when
+  variants exist.
+- When saving a variant, write its stock only when the admin changed it from
+  the value loaded into the form. Price and other edits must not overwrite
+  stock changes from purchases made while the form was open.
+- Empty variant SKUs are stored as `null`, never as empty strings, since SKU is
+  unique.
+- Products with order history must be hidden instead of deleted; historical
+  order items retain their references and purchase-time prices.

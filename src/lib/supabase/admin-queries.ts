@@ -14,6 +14,93 @@ export const ADMIN_ORDER_STATUSES = [
 ] as const;
 export type AdminOrderStatus = (typeof ADMIN_ORDER_STATUSES)[number];
 export const ADMIN_ORDER_PAGE_SIZE = 20;
+export const ADMIN_PRODUCT_PAGE_SIZE = 20;
+
+export type AdminProductVariant = {
+  id: string;
+  size: string;
+  color: string;
+  stock: number;
+  price: number;
+  sku: string | null;
+};
+
+export type AdminProduct = {
+  id: string;
+  name: string;
+  slug: string;
+  categoryId: string;
+  categoryName: string;
+  description: string | null;
+  basePrice: number;
+  isActive: boolean;
+  variantCount: number;
+  totalStock: number;
+  variants: AdminProductVariant[];
+};
+
+export type AdminCategory = { id: string; name: string };
+
+export async function getAdminCategories(): Promise<AdminCategory[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase.from("categories").select("id, name").order("name");
+  if (error) throw new Error("Failed to load categories.");
+  return data ?? [];
+}
+
+export async function getAdminProducts(page = 1): Promise<{ products: AdminProduct[]; totalCount: number }> {
+  const supabase = await createClient();
+  const currentPage = Number.isInteger(page) && page > 0 ? page : 1;
+  const from = (currentPage - 1) * ADMIN_PRODUCT_PAGE_SIZE;
+  const { data, error, count } = await supabase
+    .from("products")
+    .select("id, name, slug, category_id, description, base_price, is_active, category:categories(name), product_variants(id, stock)", { count: "exact" })
+    .order("created_at", { ascending: false })
+    .range(from, from + ADMIN_PRODUCT_PAGE_SIZE - 1);
+  if (error) throw new Error("Failed to load products.");
+  const rows = (data ?? []) as Array<{
+    id: string; name: string; slug: string; category_id: string; description: string | null;
+    base_price: number | string; is_active: boolean;
+    category: { name: string } | { name: string }[] | null;
+    product_variants: Array<{ id: string; stock: number }>;
+  }>;
+  return {
+    products: rows.map((row) => {
+      const category = Array.isArray(row.category) ? row.category[0] : row.category;
+      return {
+        id: row.id, name: row.name, slug: row.slug, categoryId: row.category_id,
+        categoryName: category?.name ?? "Uncategorized", description: row.description,
+        basePrice: Number(row.base_price), isActive: row.is_active,
+        variantCount: row.product_variants.length,
+        totalStock: row.product_variants.reduce((sum, variant) => sum + variant.stock, 0),
+        variants: [],
+      };
+    }),
+    totalCount: count ?? 0,
+  };
+}
+
+export async function getAdminProductById(productId: string): Promise<AdminProduct | null> {
+  const supabase = await createClient();
+  const { data, error } = await supabase.from("products")
+    .select("id, name, slug, category_id, description, base_price, is_active, category:categories(name), product_variants(id, size, color, stock, price, sku)")
+    .eq("id", productId).maybeSingle();
+  if (error || !data) return null;
+  const row = data as unknown as {
+    id: string; name: string; slug: string; category_id: string; description: string | null;
+    base_price: number | string; is_active: boolean;
+    category: { name: string } | { name: string }[] | null;
+    product_variants: Array<{ id: string; size: string; color: string; stock: number; price: number | string; sku: string | null }>;
+  };
+  const category = Array.isArray(row.category) ? row.category[0] : row.category;
+  const variants = row.product_variants.map((variant) => ({ ...variant, price: Number(variant.price) }));
+  return {
+    id: row.id, name: row.name, slug: row.slug, categoryId: row.category_id,
+    categoryName: category?.name ?? "Uncategorized", description: row.description,
+    basePrice: Number(row.base_price), isActive: row.is_active,
+    variantCount: variants.length, totalStock: variants.reduce((sum, variant) => sum + variant.stock, 0), variants,
+  };
+}
 
 export type AdminOrder = {
   id: string;
@@ -150,6 +237,7 @@ export type AdminRecentOrder = {
 };
 
 export type LowStockVariant = {
+  productId: string;
   productName: string;
   size: string;
   color: string;
@@ -249,7 +337,7 @@ export async function getAdminDashboardData(): Promise<AdminDashboardData> {
         .limit(10),
       supabase
         .from("product_variants")
-        .select("stock, size, color, products(name)")
+        .select("stock, size, color, products(id, name)")
         .lte("stock", LOW_STOCK_THRESHOLD)
         .order("stock", { ascending: true }),
     ]);
@@ -270,7 +358,7 @@ export async function getAdminDashboardData(): Promise<AdminDashboardData> {
     stock: number;
     size: string;
     color: string;
-    products: { name: string } | { name: string }[] | null;
+    products: { id: string; name: string } | { id: string; name: string }[] | null;
   }>;
 
   return {
@@ -291,6 +379,7 @@ export async function getAdminDashboardData(): Promise<AdminDashboardData> {
         : variant.products;
       return product
         ? [{
+            productId: product.id,
             productName: product.name,
             size: variant.size,
             color: variant.color,

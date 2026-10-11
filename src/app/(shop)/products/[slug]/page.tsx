@@ -1,5 +1,5 @@
 import Link from "next/link";
-import Image from "next/image";
+import ProductImage from "@/components/shop/ProductImage";
 import { notFound } from "next/navigation";
 import ProductScrollRow from "@/components/shop/ProductScrollRow";
 import VariantSelector from "@/components/shop/VariantSelector";
@@ -59,13 +59,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
       <section className="grid gap-8 md:grid-cols-2 md:gap-16">
         <div className="relative aspect-[4/5] overflow-hidden bg-background-secondary">
-          <Image
-            src={`/images/products/${product.slug}.jpg`}
-            alt={product.name}
-            fill
-            sizes="(max-width: 768px) 100vw, 50vw"
-            className="object-cover"
-          />
+          <ProductImage slug={product.slug} name={product.name} sizes="(max-width: 768px) 100vw, 50vw" />
         </div>
 
         <div className="py-2 md:py-8">

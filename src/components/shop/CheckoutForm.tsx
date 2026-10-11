@@ -1,10 +1,10 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FormEvent, useState, useTransition } from "react";
 import { placeOrder } from "@/app/(shop)/checkout/actions";
+import ProductImage from "@/components/shop/ProductImage";
 import { useCart } from "@/lib/cart/CartContext";
 
 type CheckoutFormProps = {
@@ -157,13 +157,7 @@ export default function CheckoutForm({
                 {items.map((item) => (
                   <li key={item.variantId} className="flex gap-4 py-4">
                     <div className="relative h-20 w-16 shrink-0 overflow-hidden bg-background-primary">
-                      <Image
-                        src={`/images/products/${item.productSlug}.jpg`}
-                        alt={item.productName}
-                        fill
-                        sizes="64px"
-                        className="object-cover"
-                      />
+                      <ProductImage slug={item.productSlug} name={item.productName} sizes="64px" />
                     </div>
                     <div className="min-w-0 flex-1 text-sm">
                       <p className="font-medium text-foreground-primary">{item.productName}</p>

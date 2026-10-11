@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import ProductImage from "@/components/shop/ProductImage";
 import Link from "next/link";
 import { useCart } from "@/lib/cart/CartContext";
 
@@ -45,13 +45,7 @@ export default function CartPage() {
                   aria-label={`View ${item.productName}`}
                   className="relative aspect-[4/5] overflow-hidden bg-background-secondary"
                 >
-                  <Image
-                    src={`/images/products/${item.productSlug}.jpg`}
-                    alt={item.productName}
-                    fill
-                    sizes="(max-width: 640px) 96px, 128px"
-                    className="object-cover"
-                  />
+                  <ProductImage slug={item.productSlug} name={item.productName} sizes="(max-width: 640px) 96px, 128px" />
                 </Link>
 
                 <div className="flex min-w-0 flex-col items-start">

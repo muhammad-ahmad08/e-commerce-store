@@ -1,0 +1,182 @@
+"use server";
+
+import { revalidatePath, revalidateTag } from "next/cache";
+import { requireAdmin } from "@/lib/auth/requireAdmin";
+import { createClient } from "@/lib/supabase/server";
+
+type ProductInput = {
+  name: string;
+  slug: string;
+  categoryId: string;
+  description: string;
+  basePrice: number;
+  isActive: boolean;
+};
+
+type VariantInput = {
+  size: string;
+  color: string;
+  stock: number;
+  price: number;
+  sku: string;
+};
+
+type ExistingVariantInput = VariantInput & { id: string; originalStock: number };
+
+const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+
+function validMoney(value: unknown): value is number {
+  return typeof value === "number" && Number.isFinite(value) && value >= 0 && Math.abs(Math.round(value * 100) - value * 100) < 1e-8;
+}
+
+function validateProduct(input: ProductInput): string | null {
+  if (!input || typeof input.name !== "string" || !input.name.trim() || input.name.trim().length > 120) return "Enter a product name up to 120 characters.";
+  if (typeof input.slug !== "string" || input.slug.length > 80 || !SLUG_PATTERN.test(input.slug)) return "Enter a valid URL name using lowercase letters, numbers, and single hyphens.";
+  if (typeof input.categoryId !== "string" || !UUID_PATTERN.test(input.categoryId)) return "Choose a valid category.";
+  if (typeof input.description !== "string" || input.description.length > 5000) return "Description is too long.";
+  if (!validMoney(input.basePrice)) return "Enter a valid non-negative price with at most two decimal places.";
+  if (typeof input.isActive !== "boolean") return "Choose a valid visibility setting.";
+  return null;
+}
+
+function validateVariant(input: VariantInput): string | null {
+  if (!input || typeof input.size !== "string" || !input.size.trim() || input.size.trim().length > 30) return "Size is required and must be 30 characters or fewer.";
+  if (typeof input.color !== "string" || !input.color.trim() || input.color.trim().length > 30) return "Color is required and must be 30 characters or fewer.";
+  if (!Number.isInteger(input.stock) || input.stock < 0) return "Stock must be a whole number of 0 or more.";
+  if (!validMoney(input.price)) return "Enter a valid non-negative variant price with at most two decimal places.";
+  if (typeof input.sku !== "string" || input.sku.length > 50) return "SKU must be 50 characters or fewer.";
+  return null;
+}
+
+function friendlyDatabaseError(error: { code?: string; message?: string; details?: string | null }) {
+  if (error.code === "23505") {
+    const description = `${error.message ?? ""} ${error.details ?? ""}`.toLowerCase();
+    if (description.includes("slug")) return "This URL name is already used.";
+    if (description.includes("sku")) return "This SKU is already used.";
+    if (description.includes("product_id") || description.includes("size") || description.includes("color")) return "A variant with this size and color already exists for this product.";
+  }
+  if (error.code === "23503") return "This has order history and can't be deleted. Hide the product or set stock to 0 instead.";
+  return "The product could not be saved. Please review the details and try again.";
+}
+
+function revalidateProductViews(slug?: string) {
+  revalidatePath("/");
+  revalidatePath("/shop");
+  revalidatePath("/shop/[category]", "page");
+  revalidatePath("/admin/products");
+  revalidatePath("/admin");
+  revalidateTag("product-detail", { expire: 0 });
+  revalidateTag("related-products", { expire: 0 });
+  if (slug) revalidatePath(`/products/${slug}`);
+}
+
+export async function createProduct(input: ProductInput, variants: VariantInput[] = []): Promise<{ productId?: string; error?: string }> {
+  await requireAdmin();
+  const productError = validateProduct(input);
+  if (productError) return { error: productError };
+  if (!Array.isArray(variants) || variants.length > 100) return { error: "Invalid variant list." };
+  for (const variant of variants) {
+    const error = validateVariant(variant);
+    if (error) return { error };
+  }
+
+  const supabase = await createClient();
+  const { data, error } = await supabase.from("products").insert({
+    name: input.name.trim(), slug: input.slug, category_id: input.categoryId,
+    description: input.description.trim() || null, base_price: input.basePrice, is_active: input.isActive,
+  }).select("id").single();
+  if (error || !data) return { error: error ? friendlyDatabaseError(error) : "The product could not be created." };
+  if (variants.length) {
+    const { error: variantError } = await supabase.from("product_variants").insert(variants.map((variant) => ({
+      product_id: data.id, size: variant.size.trim(), color: variant.color.trim(),
+      stock: variant.stock, price: variant.price, sku: variant.sku.trim() || null,
+    })));
+    if (variantError) {
+      await supabase.from("products").delete().eq("id", data.id);
+      return { error: friendlyDatabaseError(variantError) };
+    }
+  }
+  revalidateProductViews(input.slug);
+  return { productId: data.id };
+}
+
+export async function updateProduct(productId: string, input: Omit<ProductInput, "slug">): Promise<{ error?: string }> {
+  await requireAdmin();
+  if (!UUID_PATTERN.test(productId)) return { error: "Invalid product." };
+  const productError = validateProduct({ ...input, slug: "unchanged-valid-slug" });
+  if (productError) return { error: productError };
+  const supabase = await createClient();
+  const { data: product } = await supabase.from("products").select("slug").eq("id", productId).maybeSingle();
+  if (!product) return { error: "Product not found." };
+  const { error } = await supabase.from("products").update({
+    name: input.name.trim(), category_id: input.categoryId, description: input.description.trim() || null,
+    base_price: input.basePrice, is_active: input.isActive,
+  }).eq("id", productId);
+  if (error) return { error: friendlyDatabaseError(error) };
+  revalidateProductViews(product.slug);
+  return {};
+}
+
+export async function addVariant(productId: string, input: VariantInput): Promise<{ error?: string }> {
+  await requireAdmin();
+  if (!UUID_PATTERN.test(productId)) return { error: "Invalid product." };
+  const validationError = validateVariant(input);
+  if (validationError) return { error: validationError };
+  const supabase = await createClient();
+  const { data: product } = await supabase.from("products").select("slug").eq("id", productId).maybeSingle();
+  if (!product) return { error: "Product not found." };
+  const { error } = await supabase.from("product_variants").insert({
+    product_id: productId, size: input.size.trim(), color: input.color.trim(), stock: input.stock,
+    price: input.price, sku: input.sku.trim() || null,
+  });
+  if (error) return { error: friendlyDatabaseError(error) };
+  revalidateProductViews(product.slug);
+  revalidatePath(`/admin/products/${productId}`);
+  return {};
+}
+
+export async function updateVariant(productId: string, variant: ExistingVariantInput): Promise<{ error?: string }> {
+  await requireAdmin();
+  if (!UUID_PATTERN.test(productId) || !UUID_PATTERN.test(variant.id)) return { error: "Invalid product variant." };
+  const validationError = validateVariant(variant);
+  if (validationError) return { error: validationError };
+  if (!Number.isInteger(variant.originalStock) || variant.originalStock < 0) return { error: "Invalid original stock value." };
+  const supabase = await createClient();
+  const { data: product } = await supabase.from("products").select("slug").eq("id", productId).maybeSingle();
+  if (!product) return { error: "Product not found." };
+  const values: { size: string; color: string; price: number; sku: string | null; stock?: number } = {
+    size: variant.size.trim(), color: variant.color.trim(), price: variant.price, sku: variant.sku.trim() || null,
+  };
+  if (variant.stock !== variant.originalStock) values.stock = variant.stock;
+  const { error } = await supabase.from("product_variants").update(values).eq("id", variant.id).eq("product_id", productId);
+  if (error) return { error: friendlyDatabaseError(error) };
+  revalidateProductViews(product.slug);
+  revalidatePath(`/admin/products/${productId}`);
+  return {};
+}
+
+export async function deleteVariant(productId: string, variantId: string): Promise<{ error?: string }> {
+  await requireAdmin();
+  if (!UUID_PATTERN.test(productId) || !UUID_PATTERN.test(variantId)) return { error: "Invalid product variant." };
+  const supabase = await createClient();
+  const { data: product } = await supabase.from("products").select("slug").eq("id", productId).maybeSingle();
+  if (!product) return { error: "Product not found." };
+  const { error } = await supabase.from("product_variants").delete().eq("id", variantId).eq("product_id", productId);
+  if (error) return { error: friendlyDatabaseError(error) };
+  revalidateProductViews(product.slug);
+  revalidatePath(`/admin/products/${productId}`);
+  return {};
+}
+
+export async function deleteProduct(productId: string): Promise<{ error?: string }> {
+  await requireAdmin();
+  if (!UUID_PATTERN.test(productId)) return { error: "Invalid product." };
+  const supabase = await createClient();
+  const { data: product } = await supabase.from("products").select("slug").eq("id", productId).maybeSingle();
+  if (!product) return { error: "Product not found." };
+  const { error } = await supabase.from("products").delete().eq("id", productId);
+  if (error) return { error: friendlyDatabaseError(error) };
+  revalidateProductViews(product.slug);
+  return {};
+}

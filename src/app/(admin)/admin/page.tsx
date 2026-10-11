@@ -131,7 +131,7 @@ export default async function AdminDashboardPage() {
               <tbody className="divide-y divide-border-token">
                 {dashboard.lowStockVariants.map((variant, index) => (
                   <tr key={`${variant.productName}-${variant.size}-${variant.color}-${index}`}>
-                    <td className="px-4 py-4">{variant.productName}</td>
+                    <td className="px-4 py-4"><Link href={`/admin/products/${variant.productId}`} className="underline decoration-border-token underline-offset-4 hover:text-brand-terracotta">{variant.productName}</Link></td>
                     <td className="px-4 py-4">{variant.size}</td>
                     <td className="px-4 py-4">{variant.color}</td>
                     <td className="px-4 py-4 font-semibold">{variant.stock}</td>

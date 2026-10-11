@@ -255,7 +255,7 @@ const getCachedProductBySlug = unstable_cache(
     }
   },
   ["product-detail"],
-  { revalidate: 60 },
+  { revalidate: 60, tags: ["product-detail"] },
 );
 
 export async function getProductBySlug(slug: string): Promise<ProductDetail | null> {
@@ -291,7 +291,7 @@ const getCachedRelatedProducts = unstable_cache(
     }
   },
   ["related-products"],
-  { revalidate: 60 },
+  { revalidate: 60, tags: ["related-products"] },
 );
 
 export async function getRelatedProducts(
