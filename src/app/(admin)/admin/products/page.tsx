@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { getAdminProducts, ADMIN_PRODUCT_PAGE_SIZE } from "@/lib/supabase/admin-queries";
 import { requireAdmin } from "@/lib/auth/requireAdmin";
+import ProductImage from "@/components/shop/ProductImage";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Products | Aurelia Admin", robots: { index: false, follow: false } };
@@ -24,8 +25,9 @@ export default async function AdminProductsPage({ searchParams }: Props) {
     </header>
     {products.length ? <div className="mt-8 overflow-x-auto border border-border-token">
       <table className="w-full min-w-[740px] text-left text-sm">
-        <thead className="bg-background-secondary text-xs uppercase tracking-wider text-foreground-muted"><tr><th className="px-4 py-3">Name</th><th className="px-4 py-3">Category</th><th className="px-4 py-3">Variants</th><th className="px-4 py-3">Total stock</th><th className="px-4 py-3">Visibility</th></tr></thead>
+        <thead className="bg-background-secondary text-xs uppercase tracking-wider text-foreground-muted"><tr><th className="px-4 py-3">Photo</th><th className="px-4 py-3">Name</th><th className="px-4 py-3">Category</th><th className="px-4 py-3">Variants</th><th className="px-4 py-3">Total stock</th><th className="px-4 py-3">Visibility</th></tr></thead>
         <tbody className="divide-y divide-border-token">{products.map((product) => <tr key={product.id}>
+          <td className="px-4 py-3"><div className="relative h-14 w-14 overflow-hidden bg-background-secondary"><ProductImage slug={product.slug} imagePath={product.imagePath} name={product.name} sizes="56px" /></div></td>
           <td className="px-4 py-4 font-medium"><Link href={`/admin/products/${product.id}`} className="underline decoration-border-token underline-offset-4 hover:text-brand-terracotta">{product.name}</Link></td>
           <td className="px-4 py-4 text-foreground-muted">{product.categoryName}</td>
           <td className="px-4 py-4">{product.variantCount}</td>

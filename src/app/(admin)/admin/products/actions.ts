@@ -71,6 +71,15 @@ function revalidateProductViews(slug?: string) {
   if (slug) revalidatePath(`/products/${slug}`);
 }
 
+async function deleteStoredImage(supabase: Awaited<ReturnType<typeof createClient>>, path: string, reason: string) {
+  try {
+    const { error } = await supabase.storage.from("product-images").remove([path]);
+    if (error) console.error(`${reason}:`, error.message);
+  } catch (error) {
+    console.error(`${reason}:`, error);
+  }
+}
+
 export async function createProduct(input: ProductInput, variants: VariantInput[] = []): Promise<{ productId?: string; error?: string }> {
   await requireAdmin();
   const productError = validateProduct(input);
@@ -173,10 +182,46 @@ export async function deleteProduct(productId: string): Promise<{ error?: string
   await requireAdmin();
   if (!UUID_PATTERN.test(productId)) return { error: "Invalid product." };
   const supabase = await createClient();
-  const { data: product } = await supabase.from("products").select("slug").eq("id", productId).maybeSingle();
+  const { data: product } = await supabase.from("products").select("slug, image_path").eq("id", productId).maybeSingle();
   if (!product) return { error: "Product not found." };
   const { error } = await supabase.from("products").delete().eq("id", productId);
   if (error) return { error: friendlyDatabaseError(error) };
+  if (product.image_path) await deleteStoredImage(supabase, product.image_path, "Failed to delete product image after product deletion");
   revalidateProductViews(product.slug);
+  return {};
+}
+
+export async function setProductImage(productId: string, path: string): Promise<{ error?: string }> {
+  await requireAdmin();
+  if (!UUID_PATTERN.test(productId)) return { error: "Invalid product." };
+  const uuid = "[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}";
+  if (typeof path !== "string" || !new RegExp(`^products/${productId}/${uuid}\\.(?:webp|jpg|jpeg|png)$`, "i").test(path)) {
+    return { error: "Invalid product image path." };
+  }
+
+  const supabase = await createClient();
+  const { data: product } = await supabase.from("products").select("slug, image_path").eq("id", productId).maybeSingle();
+  if (!product) return { error: "Product not found." };
+  const { error } = await supabase.from("products").update({ image_path: path }).eq("id", productId);
+  if (error) return { error: friendlyDatabaseError(error) };
+  if (product.image_path && product.image_path !== path) {
+    await deleteStoredImage(supabase, product.image_path, "Failed to delete replaced product image");
+  }
+  revalidateProductViews(product.slug);
+  revalidatePath(`/admin/products/${productId}`);
+  return {};
+}
+
+export async function removeProductImage(productId: string): Promise<{ error?: string }> {
+  await requireAdmin();
+  if (!UUID_PATTERN.test(productId)) return { error: "Invalid product." };
+  const supabase = await createClient();
+  const { data: product } = await supabase.from("products").select("slug, image_path").eq("id", productId).maybeSingle();
+  if (!product) return { error: "Product not found." };
+  const { error } = await supabase.from("products").update({ image_path: null }).eq("id", productId);
+  if (error) return { error: friendlyDatabaseError(error) };
+  if (product.image_path) await deleteStoredImage(supabase, product.image_path, "Failed to delete removed product image");
+  revalidateProductViews(product.slug);
+  revalidatePath(`/admin/products/${productId}`);
   return {};
 }

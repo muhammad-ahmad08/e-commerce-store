@@ -59,7 +59,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
       <section className="grid gap-8 md:grid-cols-2 md:gap-16">
         <div className="relative aspect-[4/5] overflow-hidden bg-background-secondary">
-          <ProductImage slug={product.slug} name={product.name} sizes="(max-width: 768px) 100vw, 50vw" />
+          <ProductImage slug={product.slug} imagePath={product.imagePath} name={product.name} sizes="(max-width: 768px) 100vw, 50vw" />
         </div>
 
         <div className="py-2 md:py-8">
@@ -77,7 +77,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
           <VariantSelector
             variants={product.variants}
             basePrice={product.basePrice}
-            product={{ id: product.id, slug: product.slug, name: product.name }}
+            product={{ id: product.id, slug: product.slug, name: product.name, imagePath: product.imagePath }}
           />
         </div>
       </section>

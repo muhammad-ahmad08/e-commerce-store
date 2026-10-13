@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import ProductForm from "@/components/admin/ProductForm";
 import VariantsEditor from "@/components/admin/VariantsEditor";
+import ProductImageUploader from "@/components/admin/ProductImageUploader";
 import { requireAdmin } from "@/lib/auth/requireAdmin";
 import { getAdminCategories, getAdminProductById } from "@/lib/supabase/admin-queries";
 
@@ -24,6 +25,7 @@ export default async function EditAdminProductPage({ params }: { params: Promise
     <h1 className="mt-2 font-serif text-4xl text-foreground-primary">Edit product</h1>
     <p className="mt-3 text-sm text-foreground-muted">Customers see: from Rs. {priceFormatter.format(customerPrice)}</p>
     <ProductForm categories={categories} product={product} />
+    <ProductImageUploader productId={product.id} slug={product.slug} name={product.name} imagePath={product.imagePath} />
     <VariantsEditor product={product} />
   </main>;
 }

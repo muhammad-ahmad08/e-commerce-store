@@ -45,7 +45,7 @@ export default function CartPage() {
                   aria-label={`View ${item.productName}`}
                   className="relative aspect-[4/5] overflow-hidden bg-background-secondary"
                 >
-                  <ProductImage slug={item.productSlug} name={item.productName} sizes="(max-width: 640px) 96px, 128px" />
+                  <ProductImage slug={item.productSlug} imagePath={item.imagePath} name={item.productName} sizes="(max-width: 640px) 96px, 128px" />
                 </Link>
 
                 <div className="flex min-w-0 flex-col items-start">

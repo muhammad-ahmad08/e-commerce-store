@@ -19,7 +19,7 @@ export default function ProductCard({
     <article>
       <Link href={`/products/${product.slug}`} className="group block">
         <div className="relative aspect-square overflow-hidden bg-background-secondary">
-          <ProductImage slug={product.slug} name={product.name} sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw" className="object-cover transition-transform duration-250 ease-editorial group-hover:scale-[1.03]" />
+          <ProductImage slug={product.slug} imagePath={product.imagePath} name={product.name} sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw" className="object-cover transition-transform duration-250 ease-editorial group-hover:scale-[1.03]" />
           {showCatalogActions && product.categoryName ? (
             <span className="absolute left-4 top-4 rounded-full bg-background-primary px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-foreground-muted">
               {product.categoryName}

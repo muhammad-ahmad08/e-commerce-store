@@ -76,7 +76,7 @@ export default async function OrderConfirmationPage({ params }: OrderConfirmatio
           {order.items.map((item, index) => (
             <li key={`${item.slug}-${item.size}-${item.color}-${index}`} className="flex gap-4 py-5">
               <div className="relative h-24 w-20 shrink-0 overflow-hidden bg-background-secondary">
-                <ProductImage slug={item.slug} name={item.name} sizes="80px" />
+                <ProductImage slug={item.slug} imagePath={item.imagePath} name={item.name} sizes="80px" />
               </div>
               <div className="flex flex-1 flex-wrap items-start justify-between gap-3">
                 <div>

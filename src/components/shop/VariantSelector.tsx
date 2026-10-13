@@ -7,7 +7,7 @@ import { useCart } from "@/lib/cart/CartContext";
 type VariantSelectorProps = {
   variants: ProductVariant[];
   basePrice: number;
-  product: { id: string; slug: string; name: string };
+  product: { id: string; slug: string; name: string; imagePath?: string | null };
 };
 
 const priceFormatter = new Intl.NumberFormat("en-PK", {
@@ -174,6 +174,7 @@ export default function VariantSelector({ variants, basePrice, product }: Varian
               variantId: activeVariant.id,
               productId: product.id,
               productSlug: product.slug,
+              imagePath: product.imagePath,
               productName: product.name,
               size: activeVariant.size,
               color: activeVariant.color,

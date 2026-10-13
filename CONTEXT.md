@@ -128,6 +128,15 @@ when prices are updated later.
   16 uses the `proxy.ts` convention (renamed from `middleware.ts`).
 - `SUPABASE_SECRET_KEY` is reserved for later server-only administrative
   operations; it is not used by these standard SSR clients.
+- Product photos are stored in the public `product-images` Storage bucket;
+  only admins may write or delete objects. Products store the object path in
+  `image_path`, never a full URL. Image resolution is uploaded image, then
+  `/images/products/<slug>.jpg`, then the design-token placeholder if loading
+  fails. Uploads go directly from the browser to Storage using the admin's
+  session and are compressed client-side before upload. Storage enforces a
+  2 MB limit and JPEG, PNG, or WebP content types. Changing
+  `NEXT_PUBLIC_SUPABASE_URL` requires restarting the dev server or redeploying
+  so the Next Image remote host configuration is refreshed.
 
 ## 12. Store Configuration
 - `src/config/store.ts` exports public store contact and payment details from

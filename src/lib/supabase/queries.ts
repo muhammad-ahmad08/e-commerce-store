@@ -17,6 +17,7 @@ type ProductRow = {
   id: string;
   name: string;
   slug: string;
+  image_path: string | null;
   base_price: number | string;
   product_variants: ProductVariantPrice[];
 };
@@ -25,6 +26,7 @@ export type FeaturedProduct = {
   id: string;
   name: string;
   slug: string;
+  imagePath: string | null;
   price: number;
   categoryName?: string;
 };
@@ -41,6 +43,7 @@ export type ProductDetail = {
   id: string;
   name: string;
   slug: string;
+  imagePath: string | null;
   description: string | null;
   basePrice: number;
   category: Category;
@@ -69,6 +72,7 @@ function mapProduct(product: ProductRow, categoryName?: string): FeaturedProduct
     id: product.id,
     name: product.name,
     slug: product.slug,
+    imagePath: product.image_path,
     price: Number.isFinite(price) ? price : 0,
     ...(categoryName ? { categoryName } : {}),
   };
@@ -91,7 +95,7 @@ export async function getProducts({
     let query = supabase
       .from("products")
       .select(
-        "id, name, slug, base_price, product_variants(price), category:categories!inner(name, slug)",
+        "id, name, slug, image_path, base_price, product_variants(price), category:categories!inner(name, slug)",
         { count: "exact" },
       )
       .eq("is_active", true);
@@ -127,7 +131,7 @@ export async function getRandomActiveProducts(
     const supabase = createPublicClient();
     let query = supabase
       .from("products")
-      .select("id, name, slug, base_price, product_variants(price), category:categories(name)")
+      .select("id, name, slug, image_path, base_price, product_variants(price), category:categories(name)")
       .eq("is_active", true);
 
     if (excludeId) query = query.neq("id", excludeId);
@@ -175,7 +179,7 @@ export async function getFeaturedProducts(): Promise<FeaturedProduct[]> {
     const supabase = createPublicClient();
     const { data, error } = await supabase
       .from("products")
-      .select("id, name, slug, base_price, product_variants(price)")
+      .select("id, name, slug, image_path, base_price, product_variants(price)")
       .eq("is_active", true)
       .order("created_at", { ascending: false })
       .limit(4);
@@ -202,7 +206,7 @@ const getCachedProductBySlug = unstable_cache(
       const { data, error } = await supabase
         .from("products")
         .select(
-          "id, name, slug, description, base_price, product_variants(id, size, color, stock, price), category:categories(id, name, slug)",
+          "id, name, slug, image_path, description, base_price, product_variants(id, size, color, stock, price), category:categories(id, name, slug)",
         )
         .eq("slug", slug)
         .eq("is_active", true)
@@ -217,6 +221,7 @@ const getCachedProductBySlug = unstable_cache(
         id: string;
         name: string;
         slug: string;
+        image_path: string | null;
         description: string | null;
         base_price: number | string;
         product_variants: Array<{
@@ -238,6 +243,7 @@ const getCachedProductBySlug = unstable_cache(
         id: product.id,
         name: product.name,
         slug: product.slug,
+        imagePath: product.image_path,
         description: product.description,
         basePrice: Number(product.base_price),
         category,
@@ -272,7 +278,7 @@ const getCachedRelatedProducts = unstable_cache(
       const supabase = createPublicClient();
       const { data, error } = await supabase
         .from("products")
-        .select("id, name, slug, base_price, product_variants(price)")
+        .select("id, name, slug, image_path, base_price, product_variants(price)")
         .eq("is_active", true)
         .eq("category_id", categoryId)
         .neq("id", excludeProductId)

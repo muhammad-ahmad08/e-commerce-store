@@ -157,7 +157,7 @@ export default function CheckoutForm({
                 {items.map((item) => (
                   <li key={item.variantId} className="flex gap-4 py-4">
                     <div className="relative h-20 w-16 shrink-0 overflow-hidden bg-background-primary">
-                      <ProductImage slug={item.productSlug} name={item.productName} sizes="64px" />
+                      <ProductImage slug={item.productSlug} imagePath={item.imagePath} name={item.productName} sizes="64px" />
                     </div>
                     <div className="min-w-0 flex-1 text-sm">
                       <p className="font-medium text-foreground-primary">{item.productName}</p>

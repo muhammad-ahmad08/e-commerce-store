@@ -16,6 +16,7 @@ export type OrderDetails = {
     priceAtPurchase: number;
     name: string;
     slug: string;
+    imagePath: string | null;
     size: string;
     color: string;
   }>;
@@ -26,7 +27,7 @@ export async function getOrderById(orderId: string): Promise<OrderDetails | null
   const { data, error } = await supabase
     .from("orders")
     .select(
-      "id, status, payment_method, total_amount, shipping_name, shipping_phone, shipping_city, shipping_address, order_items(quantity, price_at_purchase, product_variants(size, color, products(name, slug)))",
+      "id, status, payment_method, total_amount, shipping_name, shipping_phone, shipping_city, shipping_address, order_items(quantity, price_at_purchase, product_variants(size, color, products(name, slug, image_path)))",
     )
     .eq("id", orderId)
     .maybeSingle();
@@ -49,12 +50,12 @@ export async function getOrderById(orderId: string): Promise<OrderDetails | null
         | {
             size: string;
             color: string;
-            products: { name: string; slug: string } | { name: string; slug: string }[];
+          products: { name: string; slug: string; image_path: string | null } | { name: string; slug: string; image_path: string | null }[];
           }
         | {
             size: string;
             color: string;
-            products: { name: string; slug: string } | { name: string; slug: string }[];
+          products: { name: string; slug: string; image_path: string | null } | { name: string; slug: string; image_path: string | null }[];
           }[];
     }>;
   };
@@ -72,6 +73,7 @@ export async function getOrderById(orderId: string): Promise<OrderDetails | null
       priceAtPurchase: Number(orderItem.price_at_purchase),
       name: product.name,
       slug: product.slug,
+      imagePath: product.image_path,
       size: variant.size,
       color: variant.color,
     }];

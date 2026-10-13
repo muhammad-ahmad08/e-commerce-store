@@ -14,6 +14,7 @@ export type CartItem = {
   variantId: string;
   productId: string;
   productSlug: string;
+  imagePath?: string | null;
   productName: string;
   size: string;
   color: string;
@@ -44,6 +45,7 @@ function isCartItem(value: unknown): value is CartItem {
     typeof item.variantId === "string" &&
     typeof item.productId === "string" &&
     typeof item.productSlug === "string" &&
+    (item.imagePath === undefined || item.imagePath === null || typeof item.imagePath === "string") &&
     typeof item.productName === "string" &&
     typeof item.size === "string" &&
     typeof item.color === "string" &&
