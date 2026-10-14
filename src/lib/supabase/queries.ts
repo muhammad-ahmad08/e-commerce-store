@@ -1,6 +1,7 @@
 import "server-only";
 
 import { unstable_cache } from "next/cache";
+import { cache } from "react";
 import { createPublicClient } from "@/lib/supabase/server";
 
 export type Category = {
@@ -154,7 +155,7 @@ export async function getRandomActiveProducts(
   }
 }
 
-export async function getCategories(): Promise<Category[]> {
+const getCachedCategories = cache(async (): Promise<Category[]> => {
   try {
     const supabase = createPublicClient();
     const { data, error } = await supabase
@@ -170,6 +171,61 @@ export async function getCategories(): Promise<Category[]> {
     return data ?? [];
   } catch (error) {
     console.error("Failed to create the Supabase client for categories:", error);
+    return [];
+  }
+});
+
+export async function getCategories(): Promise<Category[]> {
+  return getCachedCategories();
+}
+
+export type SitemapEntry = {
+  slug: string;
+  createdAt: string | null;
+};
+
+export async function getSitemapCategories(): Promise<SitemapEntry[]> {
+  try {
+    const supabase = createPublicClient();
+    const { data, error } = await supabase
+      .from("categories")
+      .select("slug, created_at")
+      .order("created_at", { ascending: true });
+
+    if (error) {
+      console.error("Failed to fetch sitemap categories:", error.message);
+      return [];
+    }
+
+    return (data ?? []).map((category) => ({
+      slug: category.slug,
+      createdAt: category.created_at,
+    }));
+  } catch (error) {
+    console.error("Failed to create the Supabase client for sitemap categories:", error);
+    return [];
+  }
+}
+
+export async function getSitemapActiveProducts(): Promise<SitemapEntry[]> {
+  try {
+    const supabase = createPublicClient();
+    const { data, error } = await supabase
+      .from("products")
+      .select("slug, created_at")
+      .eq("is_active", true);
+
+    if (error) {
+      console.error("Failed to fetch sitemap active products:", error.message);
+      return [];
+    }
+
+    return (data ?? []).map((product) => ({
+      slug: product.slug,
+      createdAt: product.created_at,
+    }));
+  } catch (error) {
+    console.error("Failed to create the Supabase client for sitemap products:", error);
     return [];
   }
 }

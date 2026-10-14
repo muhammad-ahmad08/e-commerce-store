@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import ProductImage from "@/components/shop/ProductImage";
 import { notFound } from "next/navigation";
@@ -8,6 +9,7 @@ import {
   getProductBySlug,
   getRelatedProducts,
 } from "@/lib/supabase/queries";
+import { getCanonicalUrl } from "@/lib/site-url";
 
 export const revalidate = 60;
 
@@ -18,6 +20,20 @@ type ProductPageProps = {
 export async function generateStaticParams() {
   const slugs = await getActiveProductSlugs();
   return slugs.map((slug) => ({ slug }));
+}
+
+export async function generateMetadata({ params }: ProductPageProps): Promise<Metadata> {
+  const { slug } = await params;
+  const product = await getProductBySlug(slug);
+
+  if (!product) notFound();
+
+  return {
+    title: product.name,
+    description:
+      product.description?.trim() || `Discover ${product.name} from Aurelia.`,
+    alternates: { canonical: getCanonicalUrl(`/products/${slug}`) },
+  };
 }
 
 export default async function ProductPage({ params }: ProductPageProps) {

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Playfair_Display, Plus_Jakarta_Sans } from "next/font/google";
 import { CartProvider } from "@/lib/cart/CartContext";
+import { SITE_URL } from "@/lib/site-url";
 import "./globals.css";
 
 const playfairDisplay = Playfair_Display({
@@ -14,7 +15,11 @@ const plusJakartaSans = Plus_Jakarta_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "Aurelia — Contemporary Heritage",
+  metadataBase: SITE_URL,
+  title: {
+    default: "Aurelia — Contemporary Heritage",
+    template: "%s | Aurelia",
+  },
   description: "A considered collection of timeless apparel.",
 };
 

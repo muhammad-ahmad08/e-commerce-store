@@ -3,8 +3,16 @@ import Image from "next/image";
 import CategoryCard from "@/components/shop/CategoryCard";
 import ProductCard from "@/components/shop/ProductCard";
 import { getCategories, getFeaturedProducts } from "@/lib/supabase/queries";
+import { getCanonicalUrl } from "@/lib/site-url";
+import type { Metadata } from "next";
 
 export const revalidate = 60;
+
+export const metadata: Metadata = {
+  title: { absolute: "Aurelia — Contemporary Heritage" },
+  description: "Discover considered apparel and timeless everyday essentials from Aurelia.",
+  alternates: { canonical: getCanonicalUrl("/") },
+};
 
 export default async function HomePage() {
   const [categories, products] = await Promise.all([
