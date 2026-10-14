@@ -41,7 +41,7 @@ export default async function OrderConfirmationPage({ params }: OrderConfirmatio
   const whatsappUrl = `https://wa.me/${storeConfig.whatsappNumber}?text=${encodeURIComponent(whatsappMessage)}`;
 
   return (
-    <main className="mx-auto w-full max-w-4xl flex-1 px-5 py-12 md:px-16 md:py-16">
+    <main id="main-content" tabIndex={-1} className="mx-auto w-full max-w-4xl flex-1 px-5 py-12 md:px-16 md:py-16">
       <p className="text-xs font-semibold uppercase tracking-[0.18em] text-brand-terracotta">
         Order received
       </p>

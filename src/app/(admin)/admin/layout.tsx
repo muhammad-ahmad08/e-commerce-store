@@ -15,6 +15,7 @@ export default async function AdminLayout({ children }: { children: ReactNode })
 
   return (
     <div className="min-h-screen bg-background-primary md:grid md:grid-cols-[16rem_1fr]">
+      <a className="skip-link" href="#main-content">Skip to main content</a>
       <AdminSidebar />
       <div className="min-w-0">{children}</div>
     </div>

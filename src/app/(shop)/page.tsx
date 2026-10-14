@@ -21,7 +21,7 @@ export default async function HomePage() {
   ]);
 
   return (
-    <main className="flex-1 bg-background-primary">
+    <main id="main-content" tabIndex={-1} className="flex-1 bg-background-primary">
       <section className="overflow-hidden bg-background-secondary">
         <div className="mx-auto grid max-w-7xl items-center gap-12 px-5 py-16 sm:py-20 md:grid-cols-2 md:px-16 md:py-28">
           <div className="relative z-10">

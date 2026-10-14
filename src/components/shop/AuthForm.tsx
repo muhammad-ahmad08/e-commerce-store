@@ -110,7 +110,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
   const alternateHref = `${isSignup ? "/login" : "/signup"}${searchParams.get("redirect") ? `?redirect=${encodeURIComponent(searchParams.get("redirect") as string)}` : ""}`;
 
   return (
-    <main className="mx-auto flex w-full max-w-7xl flex-1 items-center justify-center px-5 py-16 md:px-16 md:py-24">
+    <main id="main-content" tabIndex={-1} className="mx-auto flex w-full max-w-7xl flex-1 items-center justify-center px-5 py-16 md:px-16 md:py-24">
       <section className="w-full max-w-md bg-background-secondary p-6 sm:p-10" aria-labelledby="auth-heading">
         <p className="text-xs font-semibold uppercase tracking-[0.18em] text-brand-terracotta">
           Aurelia account

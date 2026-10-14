@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useCart } from "@/lib/cart/CartContext";
 import { createClient } from "@/lib/supabase/client";
 
@@ -18,6 +18,7 @@ export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const menuButtonRef = useRef<HTMLButtonElement>(null);
   const router = useRouter();
   const { totalItems } = useCart();
 
@@ -33,6 +34,18 @@ export default function Header() {
     return () => subscription.unsubscribe();
   }, []);
 
+  useEffect(() => {
+    if (!isMenuOpen) return;
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        setIsMenuOpen(false);
+        menuButtonRef.current?.focus();
+      }
+    }
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [isMenuOpen]);
+
   async function handleLogout() {
     setIsLoggingOut(true);
     const supabase = createClient();
@@ -45,7 +58,7 @@ export default function Header() {
   }
 
   return (
-    <header className="relative z-10 border-b border-border-token bg-background-primary text-foreground-primary">
+    <header className="sticky top-0 z-50 border-b border-border-token bg-background-primary text-foreground-primary">
       <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-5 md:px-16">
         <Link
           href="/"
@@ -108,11 +121,12 @@ export default function Header() {
           </Link>
 
           <button
+            ref={menuButtonRef}
             type="button"
             className={`inline-flex size-10 items-center justify-center md:hidden ${interactiveClasses}`}
             aria-label={isMenuOpen ? "Close menu" : "Open menu"}
             aria-expanded={isMenuOpen}
-            aria-controls="mobile-navigation"
+            aria-controls={isMenuOpen ? "mobile-navigation" : undefined}
             onClick={() => setIsMenuOpen((open) => !open)}
           >
             <svg
@@ -137,7 +151,7 @@ export default function Header() {
         <nav
           id="mobile-navigation"
           aria-label="Mobile navigation"
-          className="absolute inset-x-0 top-full border-b border-border-token bg-background-primary px-5 py-5 shadow-sm md:hidden"
+          className="border-b border-border-token bg-background-primary px-5 py-5 shadow-sm md:hidden"
         >
           <ul className="flex flex-col gap-5">
             {navLinks.map((link) => (

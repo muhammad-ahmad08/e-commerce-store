@@ -61,7 +61,7 @@ export default async function AdminOrdersPage({ searchParams }: OrdersPageProps)
     filter ? `/admin/orders?status=${filter}` : "/admin/orders";
 
   return (
-    <main className="mx-auto max-w-7xl px-5 py-10 md:px-10 md:py-12">
+    <main id="main-content" tabIndex={-1} className="mx-auto max-w-7xl px-5 py-10 md:px-10 md:py-12">
       <header>
         <p className="text-xs font-semibold uppercase tracking-[0.18em] text-brand-terracotta">Store operations</p>
         <h1 className="mt-2 font-serif text-4xl text-foreground-primary">Orders</h1>

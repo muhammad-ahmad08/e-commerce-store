@@ -146,9 +146,9 @@ export default function ProductImageUploader({ productId, slug, name, imagePath 
           {compressed ? <p className="text-sm text-foreground-muted">Compressed preview · {formatSize(compressed.size)}</p> : null}
           <div className="flex flex-wrap gap-3">
             <button type="button" disabled={working || !compressed} onClick={() => void uploadAndSave()} className="min-h-11 bg-brand-terracotta px-5 text-xs font-semibold uppercase tracking-[0.12em] text-white disabled:opacity-50">{working ? "Working…" : "Upload and save"}</button>
-            {imagePath ? <button type="button" disabled={working} onClick={() => { setError(""); setConfirmRemove(true); }} className="min-h-11 border border-border-token px-5 text-xs font-semibold uppercase tracking-[0.12em] text-foreground-primary disabled:opacity-50">Remove image</button> : null}
+            {imagePath ? <button type="button" aria-expanded={confirmRemove} aria-controls={confirmRemove ? "image-removal-confirmation" : undefined} disabled={working} onClick={() => { setError(""); setConfirmRemove(true); }} className="min-h-11 border border-border-token px-5 text-xs font-semibold uppercase tracking-[0.12em] text-foreground-primary disabled:opacity-50">Remove image</button> : null}
           </div>
-          {confirmRemove ? <div className="border border-border-token bg-background-secondary p-4" role="group" aria-label="Confirm image removal">
+          {confirmRemove ? <div id="image-removal-confirmation" className="border border-border-token bg-background-secondary p-4" role="group" aria-label="Confirm image removal">
             <p className="text-sm text-foreground-primary">Remove the uploaded photo? The slug-based photo will be used if available.</p>
             <div className="mt-3 flex gap-3">
               <button type="button" disabled={working} onClick={() => void removeImage()} className="min-h-10 bg-brand-terracotta px-4 text-xs font-semibold uppercase tracking-wider text-white disabled:opacity-50">Yes, remove</button>

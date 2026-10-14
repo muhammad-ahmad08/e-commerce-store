@@ -18,7 +18,7 @@ export default async function AdminProductsPage({ searchParams }: Props) {
   const { products, totalCount } = await getAdminProducts(page);
   const pageCount = Math.max(1, Math.ceil(totalCount / ADMIN_PRODUCT_PAGE_SIZE));
 
-  return <main className="mx-auto max-w-7xl px-5 py-10 md:px-10 md:py-12">
+  return <main id="main-content" tabIndex={-1} className="mx-auto max-w-7xl px-5 py-10 md:px-10 md:py-12">
     <header className="flex flex-wrap items-end justify-between gap-5">
       <div><p className="text-xs font-semibold uppercase tracking-[0.18em] text-brand-terracotta">Inventory</p><h1 className="mt-2 font-serif text-4xl text-foreground-primary">Products</h1></div>
       <Link href="/admin/products/new" className="inline-flex min-h-12 items-center bg-brand-terracotta px-6 text-xs font-semibold uppercase tracking-[0.15em] text-white">New product</Link>

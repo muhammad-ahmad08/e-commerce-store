@@ -56,7 +56,7 @@ export default function OrderActions({ orderId, status, paymentReceived }: Order
         ))}
         {canCancel ? (
           confirmCancel ? (
-            <div className="flex flex-wrap items-center gap-3" role="group" aria-label="Confirm order cancellation">
+            <div id="order-cancel-confirmation" className="flex flex-wrap items-center gap-3" role="group" aria-label="Confirm order cancellation">
               <span className="text-sm text-foreground-primary">Cancel and restock?</span>
               <button type="button" disabled={isPending} className={primaryButtonClass} onClick={() => changeStatus("cancelled")}>
                 Yes, cancel order
@@ -66,7 +66,7 @@ export default function OrderActions({ orderId, status, paymentReceived }: Order
               </button>
             </div>
           ) : (
-            <button type="button" disabled={isPending} className={buttonClass} onClick={() => setConfirmCancel(true)}>
+            <button type="button" aria-expanded={confirmCancel} aria-controls="order-cancel-confirmation" disabled={isPending} className={buttonClass} onClick={() => setConfirmCancel(true)}>
               Cancel order
             </button>
           )

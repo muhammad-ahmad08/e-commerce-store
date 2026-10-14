@@ -72,7 +72,7 @@ export default function CheckoutForm({
   }
 
   return (
-    <main className="mx-auto w-full max-w-7xl flex-1 px-5 py-12 md:px-16 md:py-16">
+    <main id="main-content" tabIndex={-1} className="mx-auto w-full max-w-7xl flex-1 px-5 py-12 md:px-16 md:py-16">
       <p className="text-xs font-semibold uppercase tracking-[0.18em] text-brand-terracotta">
         Secure checkout
       </p>

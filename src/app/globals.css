@@ -28,3 +28,36 @@ body {
   color: var(--color-text-primary);
   font-family: var(--font-plus-jakarta-sans), sans-serif;
 }
+
+:focus-visible {
+  outline: 3px solid var(--color-accent-terracotta);
+  outline-offset: 3px;
+}
+
+/* Reusable, visible-on-focus navigation aid. */
+.skip-link {
+  position: fixed;
+  z-index: 100;
+  top: 1rem;
+  left: 1rem;
+  transform: translateY(-200%);
+  background: var(--color-accent-forest);
+  color: var(--color-bg-primary);
+  padding: 0.75rem 1rem;
+  font-weight: 600;
+}
+
+.skip-link:focus {
+  transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

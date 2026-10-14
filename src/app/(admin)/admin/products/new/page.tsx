@@ -10,7 +10,7 @@ export const metadata: Metadata = { title: "New product | Aurelia Admin", robots
 export default async function NewAdminProductPage() {
   await requireAdmin();
   const categories = await getAdminCategories();
-  return <main className="mx-auto max-w-4xl px-5 py-10 md:px-10 md:py-12">
+  return <main id="main-content" tabIndex={-1} className="mx-auto max-w-4xl px-5 py-10 md:px-10 md:py-12">
     <Link href="/admin/products" className="text-sm text-foreground-muted underline underline-offset-4">← Products</Link>
     <p className="mt-8 text-xs font-semibold uppercase tracking-[0.18em] text-brand-terracotta">Inventory</p>
     <h1 className="mt-2 font-serif text-4xl text-foreground-primary">New product</h1>

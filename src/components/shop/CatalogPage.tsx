@@ -48,7 +48,7 @@ export default async function CatalogPage({
   const catalogHref = categorySlug ? `/shop/${categorySlug}` : "/shop";
 
   return (
-    <main className="flex-1 bg-background-primary">
+    <main id="main-content" tabIndex={-1} className="flex-1 bg-background-primary">
       <section className="border-b border-border-token bg-background-secondary">
         <div className="mx-auto flex max-w-7xl flex-col gap-6 px-5 py-10 sm:flex-row sm:items-end sm:justify-between md:px-16 md:py-14">
           <div>

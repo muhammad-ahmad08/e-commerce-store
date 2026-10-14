@@ -32,7 +32,7 @@ export default async function AdminDashboardPage() {
   const dashboard = await getAdminDashboardData();
 
   return (
-    <main className="mx-auto max-w-7xl px-5 py-10 md:px-10 md:py-12">
+    <main id="main-content" tabIndex={-1} className="mx-auto max-w-7xl px-5 py-10 md:px-10 md:py-12">
       <header>
         <p className="text-xs font-semibold uppercase tracking-[0.18em] text-brand-terracotta">
           Store overview

@@ -49,7 +49,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
   );
 
   return (
-    <main className="mx-auto max-w-7xl px-5 py-8 md:px-16 md:py-12">
+    <main id="main-content" tabIndex={-1} className="mx-auto max-w-7xl px-5 py-8 md:px-16 md:py-12">
       <nav aria-label="Breadcrumb" className="mb-8 text-xs text-foreground-muted">
         <ol className="flex flex-wrap items-center gap-2">
           <li>

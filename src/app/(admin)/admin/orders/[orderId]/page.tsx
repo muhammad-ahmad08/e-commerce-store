@@ -40,7 +40,7 @@ export default async function AdminOrderDetailPage({ params }: OrderDetailPagePr
       : "Cash on delivery";
 
   return (
-    <main className="mx-auto max-w-5xl px-5 py-10 md:px-10 md:py-12">
+    <main id="main-content" tabIndex={-1} className="mx-auto max-w-5xl px-5 py-10 md:px-10 md:py-12">
       <Link href="/admin/orders" className="text-sm text-foreground-muted underline underline-offset-4 hover:text-brand-terracotta">← All orders</Link>
       <header className="mt-6">
         <p className="text-xs font-semibold uppercase tracking-[0.18em] text-brand-terracotta">Order reference {order.id.slice(0, 8).toUpperCase()}</p>

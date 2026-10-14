@@ -12,7 +12,7 @@ export default function CartPage() {
   const { items, removeItem, updateQuantity, totalPrice } = useCart();
 
   return (
-    <main className="mx-auto w-full max-w-7xl flex-1 px-5 py-12 md:px-16 md:py-16">
+    <main id="main-content" tabIndex={-1} className="mx-auto w-full max-w-7xl flex-1 px-5 py-12 md:px-16 md:py-16">
       <h1 className="font-serif text-4xl text-foreground-primary sm:text-5xl">
         Your Cart
       </h1>

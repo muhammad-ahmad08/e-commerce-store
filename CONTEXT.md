@@ -76,6 +76,13 @@ when prices are updated later.
 - Transitions: `250ms cubic-bezier(0.4, 0, 0.2, 1)`
 - Product card image hover: `scale(1.03)` inside `overflow-hidden`
 - Alternating background bands between sections (ivory ↔ deep forest)
+- Storefront header is sticky at the top of the viewport; preserve usable
+  navigation and content spacing on mobile widths.
+- Keyboard focus indicators must remain clearly visible; every storefront and
+  admin layout provides a skip link to the page's single main-content landmark.
+- Honor `prefers-reduced-motion` by disabling or substantially reducing
+  non-essential transitions and animations without hiding information or
+  changing functional behavior.
 
 ## 7. Non-Negotiable Business Rules
 1. **Never trust the client.** All prices, stock levels, and totals are
