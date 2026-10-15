@@ -1,7 +1,13 @@
 import Link from "next/link";
 import Image from "next/image";
+import { Fragment } from "react";
 import CategoryCard from "@/components/shop/CategoryCard";
 import ProductCard from "@/components/shop/ProductCard";
+import {
+  HeroParallaxImage,
+  HeroReveal,
+  MagneticHeroLink,
+} from "@/components/shop/HeroMotion";
 import { getCategories, getFeaturedProducts } from "@/lib/supabase/queries";
 import { getCanonicalUrl } from "@/lib/site-url";
 import type { Metadata } from "next";
@@ -24,35 +30,31 @@ export default async function HomePage() {
     <main id="main-content" tabIndex={-1} className="flex-1 bg-background-primary">
       <section className="overflow-hidden bg-background-secondary">
         <div className="mx-auto grid max-w-7xl items-center gap-12 px-5 py-16 sm:py-20 md:grid-cols-2 md:px-16 md:py-28">
-          <div className="relative z-10">
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-brand-terracotta sm:text-sm">
+          <HeroReveal>
+            <p className="hero-reveal-item text-xs font-semibold uppercase tracking-[0.2em] text-brand-terracotta sm:text-sm">
               Made for the moments that matter
             </p>
-            <h1 className="mt-5 max-w-xl font-serif text-5xl leading-[1.05] tracking-tight text-foreground-primary sm:text-6xl lg:text-7xl">
-              A quieter kind of statement.
+            <h1 className="hero-reveal-item mt-5 max-w-xl font-serif text-5xl leading-[1.05] tracking-tight text-foreground-primary sm:text-6xl lg:text-7xl">
+              {"A quieter kind of statement.".split(" ").map((word, index, words) => (
+                <Fragment key={word}>
+                  <span
+                    className="hero-reveal-word"
+                    style={{ transitionDelay: `${index * 65}ms` }}
+                  >
+                    {word}
+                  </span>
+                  {index < words.length - 1 ? " " : ""}
+                </Fragment>
+              ))}
             </h1>
-            <p className="mt-6 max-w-lg text-base leading-7 text-foreground-muted sm:text-lg sm:leading-8">
+            <p className="hero-reveal-item hero-reveal-description mt-6 max-w-lg text-base leading-7 text-foreground-muted sm:text-lg sm:leading-8">
               Discover considered essentials, shaped by heritage and made to
               find their place in your everyday.
             </p>
-            <Link
-              href="/shop"
-              className="mt-8 inline-flex min-h-12 items-center justify-center bg-brand-terracotta px-7 text-xs font-semibold uppercase tracking-[0.15em] text-background-primary transition-colors duration-250 ease-editorial hover:bg-brand-forest"
-            >
-              Explore the collection
-            </Link>
-          </div>
+            <MagneticHeroLink />
+          </HeroReveal>
 
-          <div className="relative mx-auto aspect-[4/3] w-full max-w-xl overflow-hidden bg-background-primary">
-            <Image
-              src="/images/hero/hero-banner.jpg"
-              alt="A model wearing a considered everyday outfit in a warm, sunlit interior"
-              fill
-              priority
-              sizes="(max-width: 768px) 100vw, 50vw"
-              className="object-cover"
-            />
-          </div>
+          <HeroParallaxImage />
         </div>
       </section>
 

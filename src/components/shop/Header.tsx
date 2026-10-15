@@ -73,7 +73,7 @@ export default function Header() {
             <Link
               key={link.href}
               href={link.href}
-              className={`text-sm font-semibold uppercase tracking-[0.15em] ${interactiveClasses}`}
+              className={`nav-link text-sm font-semibold uppercase tracking-[0.15em] ${interactiveClasses}`}
             >
               {link.label}
             </Link>
@@ -158,7 +158,7 @@ export default function Header() {
               <li key={link.href}>
                 <Link
                   href={link.href}
-                  className={`block py-1 text-sm font-semibold uppercase tracking-[0.15em] ${interactiveClasses}`}
+                  className={`nav-link block py-1 text-sm font-semibold uppercase tracking-[0.15em] ${interactiveClasses}`}
                   onClick={() => setIsMenuOpen(false)}
                 >
                   {link.label}

@@ -83,6 +83,11 @@ when prices are updated later.
 - Honor `prefers-reduced-motion` by disabling or substantially reducing
   non-essential transitions and animations without hiding information or
   changing functional behavior.
+- Keep motion brief and purposeful. The homepage hero may use its approved
+  entrance/reveal, subtle image parallax, and magnetic CTA effects; the Home/Shop
+  navigation may use a center-out hover/focus underline. Any motion must respect
+  reduced-motion preferences, and no other decorative motion should be added
+  without an explicit design decision.
 
 ## 7. Non-Negotiable Business Rules
 1. **Never trust the client.** All prices, stock levels, and totals are
