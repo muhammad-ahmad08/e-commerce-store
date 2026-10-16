@@ -3,6 +3,7 @@
 import { revalidatePath, revalidateTag } from "next/cache";
 import { requireAdmin } from "@/lib/auth/requireAdmin";
 import { createClient } from "@/lib/supabase/server";
+import { normalizeSku, validateProduct, validateVariant } from "@/lib/admin/product-validation";
 
 type ProductInput = {
   name: string;
@@ -24,30 +25,6 @@ type VariantInput = {
 type ExistingVariantInput = VariantInput & { id: string; originalStock: number };
 
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-const SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
-
-function validMoney(value: unknown): value is number {
-  return typeof value === "number" && Number.isFinite(value) && value >= 0 && Math.abs(Math.round(value * 100) - value * 100) < 1e-8;
-}
-
-function validateProduct(input: ProductInput): string | null {
-  if (!input || typeof input.name !== "string" || !input.name.trim() || input.name.trim().length > 120) return "Enter a product name up to 120 characters.";
-  if (typeof input.slug !== "string" || input.slug.length > 80 || !SLUG_PATTERN.test(input.slug)) return "Enter a valid URL name using lowercase letters, numbers, and single hyphens.";
-  if (typeof input.categoryId !== "string" || !UUID_PATTERN.test(input.categoryId)) return "Choose a valid category.";
-  if (typeof input.description !== "string" || input.description.length > 5000) return "Description is too long.";
-  if (!validMoney(input.basePrice)) return "Enter a valid non-negative price with at most two decimal places.";
-  if (typeof input.isActive !== "boolean") return "Choose a valid visibility setting.";
-  return null;
-}
-
-function validateVariant(input: VariantInput): string | null {
-  if (!input || typeof input.size !== "string" || !input.size.trim() || input.size.trim().length > 30) return "Size is required and must be 30 characters or fewer.";
-  if (typeof input.color !== "string" || !input.color.trim() || input.color.trim().length > 30) return "Color is required and must be 30 characters or fewer.";
-  if (!Number.isInteger(input.stock) || input.stock < 0) return "Stock must be a whole number of 0 or more.";
-  if (!validMoney(input.price)) return "Enter a valid non-negative variant price with at most two decimal places.";
-  if (typeof input.sku !== "string" || input.sku.length > 50) return "SKU must be 50 characters or fewer.";
-  return null;
-}
 
 function friendlyDatabaseError(error: { code?: string; message?: string; details?: string | null }) {
   if (error.code === "23505") {
@@ -99,7 +76,7 @@ export async function createProduct(input: ProductInput, variants: VariantInput[
   if (variants.length) {
     const { error: variantError } = await supabase.from("product_variants").insert(variants.map((variant) => ({
       product_id: data.id, size: variant.size.trim(), color: variant.color.trim(),
-      stock: variant.stock, price: variant.price, sku: variant.sku.trim() || null,
+      stock: variant.stock, price: variant.price, sku: normalizeSku(variant.sku),
     })));
     if (variantError) {
       await supabase.from("products").delete().eq("id", data.id);
@@ -137,7 +114,7 @@ export async function addVariant(productId: string, input: VariantInput): Promis
   if (!product) return { error: "Product not found." };
   const { error } = await supabase.from("product_variants").insert({
     product_id: productId, size: input.size.trim(), color: input.color.trim(), stock: input.stock,
-    price: input.price, sku: input.sku.trim() || null,
+    price: input.price, sku: normalizeSku(input.sku),
   });
   if (error) return { error: friendlyDatabaseError(error) };
   revalidateProductViews(product.slug);
@@ -155,7 +132,7 @@ export async function updateVariant(productId: string, variant: ExistingVariantI
   const { data: product } = await supabase.from("products").select("slug").eq("id", productId).maybeSingle();
   if (!product) return { error: "Product not found." };
   const values: { size: string; color: string; price: number; sku: string | null; stock?: number } = {
-    size: variant.size.trim(), color: variant.color.trim(), price: variant.price, sku: variant.sku.trim() || null,
+    size: variant.size.trim(), color: variant.color.trim(), price: variant.price, sku: normalizeSku(variant.sku),
   };
   if (variant.stock !== variant.originalStock) values.stock = variant.stock;
   const { error } = await supabase.from("product_variants").update(values).eq("id", variant.id).eq("product_id", productId);

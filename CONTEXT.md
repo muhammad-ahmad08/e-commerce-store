@@ -215,3 +215,14 @@ when prices are updated later.
   storefront navigation, and never exposes exception details. Error recovery
   must not imply that uncertain order or payment actions can safely be
   repeated.
+
+## 17. Automated Testing
+- Use npm for all package scripts and lockfile changes.
+- Run the deterministic unit suite with `npm test`; tests use Vitest in Node
+  and must not require `.env.local`, credentials, a running app, or Supabase.
+- Test pure business logic through the helpers used by production call sites;
+  keep Server Action, Supabase, Next.js request/cache, and browser persistence
+  orchestration outside unit-test helpers.
+- Automated unit tests do not verify database RLS, privileges, RPC behavior,
+  transaction atomicity, stock locking, Storage policies, or browser flows.
+  Refer to README.md for the documented distinction and prior manual evidence.

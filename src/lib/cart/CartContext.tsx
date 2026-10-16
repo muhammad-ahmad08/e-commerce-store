@@ -9,19 +9,15 @@ import {
   useState,
   type ReactNode,
 } from "react";
-
-export type CartItem = {
-  variantId: string;
-  productId: string;
-  productSlug: string;
-  imagePath?: string | null;
-  productName: string;
-  size: string;
-  color: string;
-  unitPrice: number;
-  quantity: number;
-  stockAtTimeAdded: number;
-};
+import {
+  addCartItem,
+  getCartTotals,
+  isCartItem,
+  removeCartItem,
+  updateCartQuantity,
+  type CartItem,
+} from "@/lib/cart/cart-logic";
+export type { CartItem } from "@/lib/cart/cart-logic";
 
 type CartContextValue = {
   items: CartItem[];
@@ -36,29 +32,6 @@ type CartContextValue = {
 
 const CART_STORAGE_KEY = "aurelia-cart";
 const CartContext = createContext<CartContextValue | null>(null);
-
-function isCartItem(value: unknown): value is CartItem {
-  if (typeof value !== "object" || value === null) return false;
-  const item = value as Record<string, unknown>;
-
-  return (
-    typeof item.variantId === "string" &&
-    typeof item.productId === "string" &&
-    typeof item.productSlug === "string" &&
-    (item.imagePath === undefined || item.imagePath === null || typeof item.imagePath === "string") &&
-    typeof item.productName === "string" &&
-    typeof item.size === "string" &&
-    typeof item.color === "string" &&
-    typeof item.unitPrice === "number" &&
-    Number.isFinite(item.unitPrice) &&
-    typeof item.quantity === "number" &&
-    Number.isInteger(item.quantity) &&
-    item.quantity >= 1 &&
-    typeof item.stockAtTimeAdded === "number" &&
-    Number.isInteger(item.stockAtTimeAdded) &&
-    item.stockAtTimeAdded >= 1
-  );
-}
 
 export function CartProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
@@ -93,38 +66,11 @@ export function CartProvider({ children }: { children: ReactNode }) {
   }, [hasLoaded, items]);
 
   const addItem = useCallback((item: CartItem) => {
-    if (item.stockAtTimeAdded < 1 || item.quantity < 1) return;
-
-    setItems((currentItems) => {
-      const existingItem = currentItems.find(
-        (currentItem) => currentItem.variantId === item.variantId,
-      );
-
-      if (existingItem) {
-        return currentItems.map((currentItem) =>
-          currentItem.variantId === item.variantId
-            ? {
-                ...currentItem,
-                quantity: Math.min(
-                  currentItem.stockAtTimeAdded,
-                  currentItem.quantity + item.quantity,
-                ),
-              }
-            : currentItem,
-        );
-      }
-
-      return [
-        ...currentItems,
-        { ...item, quantity: Math.min(item.quantity, item.stockAtTimeAdded) },
-      ];
-    });
+    setItems((currentItems) => addCartItem(currentItems, item));
   }, []);
 
   const removeItem = useCallback((variantId: string) => {
-    setItems((currentItems) =>
-      currentItems.filter((item) => item.variantId !== variantId),
-    );
+    setItems((currentItems) => removeCartItem(currentItems, variantId));
   }, []);
 
   const clearCart = useCallback(() => {
@@ -132,15 +78,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const updateQuantity = useCallback((variantId: string, quantity: number) => {
-    if (quantity < 1) return;
-
-    setItems((currentItems) =>
-      currentItems.map((item) =>
-        item.variantId === variantId
-          ? { ...item, quantity: Math.min(item.stockAtTimeAdded, Math.floor(quantity)) }
-          : item,
-      ),
-    );
+    setItems((currentItems) => updateCartQuantity(currentItems, variantId, quantity));
   }, []);
 
   const value = useMemo<CartContextValue>(
@@ -151,11 +89,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
       removeItem,
       updateQuantity,
       clearCart,
-      totalItems: items.reduce((total, item) => total + item.quantity, 0),
-      totalPrice: items.reduce(
-        (total, item) => total + item.unitPrice * item.quantity,
-        0,
-      ),
+      ...getCartTotals(items),
     }),
     [items, hasLoaded, addItem, removeItem, updateQuantity, clearCart],
   );
