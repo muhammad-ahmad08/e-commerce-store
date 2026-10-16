@@ -200,3 +200,18 @@ when prices are updated later.
   unique.
 - Products with order history must be hidden instead of deleted; historical
   order items retain their references and purchase-time prices.
+
+## 16. Store Navigation & Error Recovery
+- Store navigation links only to existing routes or configured destinations;
+  unavailable destinations remain plain, non-interactive labels rather than
+  placeholder links.
+- The homepage story section uses the stable `our-story` ID for the
+  `/#our-story` navigation destination; it is not a separate route.
+- WhatsApp links use `storeConfig.whatsappNumber`, which is normalized to
+  digits only. Render contact information as non-interactive text when no
+  number is configured; open configured WhatsApp destinations with safe
+  external-link attributes.
+- Not-found and unexpected-error recovery UI stays generic, offers safe
+  storefront navigation, and never exposes exception details. Error recovery
+  must not imply that uncertain order or payment actions can safely be
+  repeated.

@@ -5,10 +5,12 @@ import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { useCart } from "@/lib/cart/CartContext";
 import { createClient } from "@/lib/supabase/client";
+import { storeConfig } from "@/config/store";
 
 const navLinks = [
   { href: "/", label: "Home" },
   { href: "/shop", label: "Shop" },
+  { href: "/#our-story", label: "Our Story" },
 ];
 
 const interactiveClasses =
@@ -78,6 +80,11 @@ export default function Header() {
               {link.label}
             </Link>
           ))}
+          {storeConfig.whatsappNumber ? (
+            <a href={`https://wa.me/${storeConfig.whatsappNumber}`} target="_blank" rel="noopener noreferrer" className={`nav-link text-sm font-semibold uppercase tracking-[0.15em] ${interactiveClasses}`}>Contact</a>
+          ) : (
+            <span className="text-sm font-semibold uppercase tracking-[0.15em] text-foreground-muted">Contact</span>
+          )}
         </nav>
 
         <div className="flex items-center gap-5">
@@ -165,6 +172,13 @@ export default function Header() {
                 </Link>
               </li>
             ))}
+            <li>
+              {storeConfig.whatsappNumber ? (
+                <a href={`https://wa.me/${storeConfig.whatsappNumber}`} target="_blank" rel="noopener noreferrer" className={`block py-1 text-sm font-semibold uppercase tracking-[0.15em] ${interactiveClasses}`} onClick={() => setIsMenuOpen(false)}>Contact</a>
+              ) : (
+                <span className="block py-1 text-sm font-semibold uppercase tracking-[0.15em] text-foreground-muted">Contact</span>
+              )}
+            </li>
           </ul>
         </nav>
       )}

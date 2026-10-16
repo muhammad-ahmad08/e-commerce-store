@@ -131,7 +131,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <section className="relative isolate overflow-hidden bg-brand-forest text-background-primary">
+      <section id="our-story" className="relative isolate overflow-hidden bg-brand-forest text-background-primary">
         <Image
           src="/images/story/story-section.jpg"
           alt="A craftsperson weaving fabric on a traditional loom"

@@ -1,17 +1,27 @@
 import Link from "next/link";
+import { storeConfig } from "@/config/store";
 
 const footerColumns = [
   {
     title: "Shop",
-    links: ["New Arrivals", "All Clothing"],
+    links: [
+      { label: "New Arrivals", href: "/shop" },
+      { label: "All Clothing", href: "/shop" },
+    ],
   },
   {
     title: "Help",
-    links: ["Contact Us", "Shipping & Returns"],
+    links: [
+      { label: "Contact Us", href: null },
+      { label: "Shipping & Returns", href: null },
+    ],
   },
   {
     title: "Company",
-    links: ["Our Story", "Careers"],
+    links: [
+      { label: "Our Story", href: "/#our-story" },
+      { label: "Careers", href: null },
+    ],
   },
 ];
 
@@ -41,14 +51,19 @@ export default function Footer() {
                 {column.title}
               </h2>
               <ul className="mt-5 space-y-3">
-                {column.links.map((label) => (
+                {column.links.map(({ label, href }) => (
                   <li key={label}>
-                    <Link
-                      href="#"
-                      className={`text-sm text-background-secondary ${interactiveClasses}`}
-                    >
-                      {label}
-                    </Link>
+                    {href ? (
+                      <Link href={href} className={`text-sm text-background-secondary ${interactiveClasses}`}>
+                        {label}
+                      </Link>
+                    ) : label === "Contact Us" && storeConfig.whatsappNumber ? (
+                      <a href={`https://wa.me/${storeConfig.whatsappNumber}`} target="_blank" rel="noopener noreferrer" className={`text-sm text-background-secondary ${interactiveClasses}`}>
+                        {label}
+                      </a>
+                    ) : (
+                      <span className="text-sm text-background-secondary">{label}</span>
+                    )}
                   </li>
                 ))}
               </ul>
